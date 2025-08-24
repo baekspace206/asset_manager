@@ -472,4 +472,4 @@ GET /audit/logs
 - CORS is configured to allow requests from the frontend
 - JWT tokens are stored in localStorage
 - Database synchronization is enabled in development mode
-- All passwords are hashed using bcrypt
+- All passwords are hashed using bcrypt# asset_manager
