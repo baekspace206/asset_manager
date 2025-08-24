@@ -1,0 +1,14 @@
+{
+  "name": "asset-manager",
+  "version": "1.0.0",
+  "description": "Asset Manager Full Stack Application",
+  "scripts": {
+    "dev": "concurrently \"npm run backend:dev\" \"npm run frontend:dev\"",
+    "backend:dev": "cd apps/backend && pnpm run start:dev",
+    "frontend:dev": "cd apps/frontend && npm start",
+    "install:all": "cd apps/backend && pnpm install && cd ../frontend && npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
