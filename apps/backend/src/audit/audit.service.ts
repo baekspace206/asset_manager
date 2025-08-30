@@ -16,7 +16,9 @@ export class AuditService {
     entityId: number,
     entityName: string,
     oldValue?: any,
-    newValue?: any
+    newValue?: any,
+    previousTotalValue?: number,
+    currentTotalValue?: number
   ): Promise<AuditLog> {
     const auditLog = new AuditLog();
     auditLog.action = action;
@@ -25,6 +27,8 @@ export class AuditService {
     auditLog.entityName = entityName;
     auditLog.oldValue = oldValue ? JSON.stringify(oldValue) : null;
     auditLog.newValue = newValue ? JSON.stringify(newValue) : null;
+    auditLog.previousTotalValue = previousTotalValue || null;
+    auditLog.currentTotalValue = currentTotalValue || null;
 
     return await this.auditLogRepository.save(auditLog);
   }

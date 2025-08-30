@@ -23,6 +23,12 @@ export class AuditLog {
   @Column({ type: 'text', nullable: true })
   newValue: string | null; // JSON string of new values
 
+  @Column('decimal', { precision: 15, scale: 2, nullable: true })
+  previousTotalValue: number | null;
+
+  @Column('decimal', { precision: 15, scale: 2, nullable: true })
+  currentTotalValue: number | null;
+
   @CreateDateColumn()
   timestamp: Date;
 }

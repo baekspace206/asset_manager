@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Asset, assetAPI } from '../services/api';
 import AssetSummary from './AssetSummary';
 import AuditLogTable from './AuditLogTable';
+import Modal from './Modal';
 
 interface GroupedAsset extends Asset {
   isFirstInCategory?: boolean;
@@ -216,183 +217,167 @@ const AssetList: React.FC = () => {
 
       <AssetSummary assets={assets} />
 
-      {showForm && (
-        <div style={{
-          backgroundColor: 'white',
-          padding: '24px',
-          borderRadius: '12px',
-          marginBottom: '24px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-          border: '1px solid #e5e7eb'
-        }}>
-          <h3 style={{ 
-            margin: '0 0 20px 0', 
-            color: '#1f2937', 
-            fontSize: '20px', 
-            fontWeight: '600',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
-          }}>
-            {editingAsset ? '✏️ Edit Financial Asset' : '➕ Add New Financial Asset'}
-          </h3>
-          <form onSubmit={handleSubmit}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px' }}>
-              <div>
-                <label style={{ color: '#374151', fontWeight: '500', fontSize: '14px' }}>
-                  Name:
-                  <input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    required
-                    placeholder="e.g., Samsung Stock, Bitcoin, Main House"
-                    style={{
-                      width: '100%',
-                      padding: '12px',
-                      marginTop: '8px',
-                      border: '2px solid #e5e7eb',
-                      borderRadius: '8px',
-                      fontSize: '14px',
-                      transition: 'border-color 0.2s'
-                    }}
-                    onFocus={(e) => e.target.style.borderColor = '#3b82f6'}
-                    onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
-                  />
-                </label>
-              </div>
-              <div>
-                <label style={{ color: '#374151', fontWeight: '500', fontSize: '14px' }}>
-                  Category:
-                  <select
-                    value={formData.category}
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    style={{
-                      width: '100%',
-                      padding: '12px',
-                      marginTop: '8px',
-                      border: '2px solid #e5e7eb',
-                      borderRadius: '8px',
-                      fontSize: '14px',
-                      backgroundColor: 'white'
-                    }}
-                  >
-                    <option value="">Select a financial asset category</option>
-                    <option value="House">🏡 House</option>
-                    <option value="Deposit">🏦 Deposit</option>
-                    <option value="Savings">💳 Savings</option>
-                    <option value="Stock">📈 Stock</option>
-                    <option value="Coin">₿ Cryptocurrency</option>
-                    <option value="Parking Account">🅿️ Parking Account</option>
-                    <option value="Pension">👴 Pension</option>
-                  </select>
-                </label>
-              </div>
-              <div>
-                <label style={{ color: '#374151', fontWeight: '500', fontSize: '14px' }}>
-                  Amount (₩):
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={formData.amount}
-                    onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })}
-                    required
-                    placeholder="0.00"
-                    style={{
-                      width: '100%',
-                      padding: '12px',
-                      marginTop: '8px',
-                      border: '2px solid #e5e7eb',
-                      borderRadius: '8px',
-                      fontSize: '14px',
-                      transition: 'border-color 0.2s'
-                    }}
-                    onFocus={(e) => e.target.style.borderColor = '#059669'}
-                    onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
-                  />
-                </label>
-              </div>
-              <div>
-                <label style={{ color: '#374151', fontWeight: '500', fontSize: '14px' }}>
-                  Note:
-                  <input
-                    type="text"
-                    value={formData.note}
-                    onChange={(e) => setFormData({ ...formData, note: e.target.value })}
-                    placeholder="e.g., 100 shares, Monthly dividend"
-                    style={{
-                      width: '100%',
-                      padding: '12px',
-                      marginTop: '8px',
-                      border: '2px solid #e5e7eb',
-                      borderRadius: '8px',
-                      fontSize: '14px',
-                      transition: 'border-color 0.2s'
-                    }}
-                    onFocus={(e) => e.target.style.borderColor = '#6b7280'}
-                    onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
-                  />
-                </label>
-              </div>
+      <Modal
+        isOpen={showForm}
+        onClose={resetForm}
+        title={editingAsset ? '✏️ Edit Financial Asset' : '➕ Add New Financial Asset'}
+      >
+        <form onSubmit={handleSubmit}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px' }}>
+            <div>
+              <label style={{ color: '#374151', fontWeight: '500', fontSize: '14px' }}>
+                Name:
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  required
+                  placeholder="e.g., Samsung Stock, Bitcoin, Main House"
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    marginTop: '8px',
+                    border: '2px solid #e5e7eb',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    transition: 'border-color 0.2s'
+                  }}
+                  onFocus={(e) => e.target.style.borderColor = '#3b82f6'}
+                  onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                />
+              </label>
             </div>
-            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-              <button
-                type="button"
-                onClick={resetForm}
-                style={{
-                  padding: '12px 24px',
-                  backgroundColor: '#f3f4f6',
-                  color: '#374151',
-                  border: '2px solid #e5e7eb',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  transition: 'all 0.2s'
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.backgroundColor = '#e5e7eb';
-                  e.currentTarget.style.borderColor = '#d1d5db';
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.backgroundColor = '#f3f4f6';
-                  e.currentTarget.style.borderColor = '#e5e7eb';
-                }}
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                style={{
-                  padding: '12px 24px',
-                  backgroundColor: '#3b82f6',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  boxShadow: '0 2px 4px rgba(59, 130, 246, 0.2)',
-                  transition: 'all 0.2s'
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.backgroundColor = '#2563eb';
-                  e.currentTarget.style.transform = 'translateY(-1px)';
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.backgroundColor = '#3b82f6';
-                  e.currentTarget.style.transform = 'translateY(0)';
-                }}
-              >
-                {editingAsset ? '✏️ Update Asset' : '💾 Create Asset'}
-              </button>
+            <div>
+              <label style={{ color: '#374151', fontWeight: '500', fontSize: '14px' }}>
+                Category:
+                <select
+                  value={formData.category}
+                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    marginTop: '8px',
+                    border: '2px solid #e5e7eb',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    backgroundColor: 'white'
+                  }}
+                >
+                  <option value="">Select a financial asset category</option>
+                  <option value="House">🏡 House</option>
+                  <option value="Deposit">🏦 Deposit</option>
+                  <option value="Savings">💳 Savings</option>
+                  <option value="Stock">📈 Stock</option>
+                  <option value="Coin">₿ Cryptocurrency</option>
+                  <option value="Parking Account">🅿️ Parking Account</option>
+                  <option value="Pension">👴 Pension</option>
+                </select>
+              </label>
             </div>
-          </form>
-        </div>
-      )}
+            <div>
+              <label style={{ color: '#374151', fontWeight: '500', fontSize: '14px' }}>
+                Amount (₩):
+                <input
+                  type="number"
+                  step="0.01"
+                  value={formData.amount}
+                  onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })}
+                  required
+                  placeholder="0.00"
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    marginTop: '8px',
+                    border: '2px solid #e5e7eb',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    transition: 'border-color 0.2s'
+                  }}
+                  onFocus={(e) => e.target.style.borderColor = '#059669'}
+                  onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                />
+              </label>
+            </div>
+            <div>
+              <label style={{ color: '#374151', fontWeight: '500', fontSize: '14px' }}>
+                Note:
+                <input
+                  type="text"
+                  value={formData.note}
+                  onChange={(e) => setFormData({ ...formData, note: e.target.value })}
+                  placeholder="e.g., 100 shares, Monthly dividend"
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    marginTop: '8px',
+                    border: '2px solid #e5e7eb',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    transition: 'border-color 0.2s'
+                  }}
+                  onFocus={(e) => e.target.style.borderColor = '#6b7280'}
+                  onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                />
+              </label>
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+            <button
+              type="button"
+              onClick={resetForm}
+              style={{
+                padding: '12px 24px',
+                backgroundColor: '#f3f4f6',
+                color: '#374151',
+                border: '2px solid #e5e7eb',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: '500',
+                transition: 'all 0.2s'
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.backgroundColor = '#e5e7eb';
+                e.currentTarget.style.borderColor = '#d1d5db';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.backgroundColor = '#f3f4f6';
+                e.currentTarget.style.borderColor = '#e5e7eb';
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              style={{
+                padding: '12px 24px',
+                backgroundColor: '#3b82f6',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: '600',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                boxShadow: '0 2px 4px rgba(59, 130, 246, 0.2)',
+                transition: 'all 0.2s'
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.backgroundColor = '#2563eb';
+                e.currentTarget.style.transform = 'translateY(-1px)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.backgroundColor = '#3b82f6';
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
+            >
+              {editingAsset ? '✏️ Update Asset' : '💾 Create Asset'}
+            </button>
+          </div>
+        </form>
+      </Modal>
 
       <div style={{ 
         backgroundColor: 'white', 
@@ -401,7 +386,13 @@ const AssetList: React.FC = () => {
         boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
         border: '1px solid #e5e7eb'
       }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <div style={{ 
+          overflowX: 'auto', 
+          WebkitOverflowScrolling: 'touch',
+          scrollbarWidth: 'thin',
+          scrollbarColor: '#d1d5db #f3f4f6'
+        }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '600px' }}>
           <thead>
             <tr style={{ backgroundColor: '#f8fafc' }}>
               <th style={{ 
@@ -579,7 +570,8 @@ const AssetList: React.FC = () => {
               </tr>
             ))}
           </tbody>
-        </table>
+          </table>
+        </div>
         {assets.length === 0 && (
           <div style={{ 
             textAlign: 'center', 

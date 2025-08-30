@@ -86,6 +86,23 @@ const AuditLogTable: React.FC = () => {
     return value.toString();
   };
 
+  const formatTotalChange = (previous: number | null, current: number | null) => {
+    if (previous === null || current === null) return null;
+    
+    const change = current - previous;
+    const isPositive = change > 0;
+    
+    return (
+      <div style={{ 
+        fontSize: '11px',
+        color: isPositive ? '#10b981' : change < 0 ? '#ef4444' : '#6b7280',
+        fontWeight: '600'
+      }}>
+        {isPositive ? '+' : ''}₩{change.toLocaleString()}
+      </div>
+    );
+  };
+
   if (loading) {
     return (
       <div style={{
@@ -187,7 +204,13 @@ const AuditLogTable: React.FC = () => {
           overflow: 'hidden',
           border: '1px solid #e5e7eb'
         }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <div style={{
+            overflowX: 'auto',
+            WebkitOverflowScrolling: 'touch',
+            scrollbarWidth: 'thin',
+            scrollbarColor: '#d1d5db #f3f4f6'
+          }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '800px' }}>
             <thead>
               <tr style={{ backgroundColor: '#f8fafc' }}>
                 <th style={{ 
@@ -220,7 +243,7 @@ const AuditLogTable: React.FC = () => {
                   borderBottom: '2px solid #e5e7eb',
                   width: '120px'
                 }}>
-                  Type
+                  Previous Total
                 </th>
                 <th style={{ 
                   padding: '12px 16px', 
@@ -229,9 +252,9 @@ const AuditLogTable: React.FC = () => {
                   color: '#374151',
                   fontSize: '12px',
                   borderBottom: '2px solid #e5e7eb',
-                  width: '180px'
+                  width: '120px'
                 }}>
-                  Timestamp
+                  Current Total
                 </th>
                 <th style={{ 
                   padding: '12px 16px', 
@@ -242,7 +265,18 @@ const AuditLogTable: React.FC = () => {
                   borderBottom: '2px solid #e5e7eb',
                   width: '100px'
                 }}>
-                  Details
+                  Change
+                </th>
+                <th style={{ 
+                  padding: '12px 16px', 
+                  textAlign: 'center', 
+                  fontWeight: '600', 
+                  color: '#374151',
+                  fontSize: '12px',
+                  borderBottom: '2px solid #e5e7eb',
+                  width: '140px'
+                }}>
+                  Timestamp
                 </th>
               </tr>
             </thead>
@@ -284,71 +318,44 @@ const AuditLogTable: React.FC = () => {
                     padding: '12px 16px',
                     textAlign: 'center',
                     color: '#6b7280',
-                    fontSize: '12px',
-                    fontWeight: '500'
+                    fontSize: '11px'
                   }}>
-                    <span style={{
-                      backgroundColor: '#f3f4f6',
-                      padding: '4px 8px',
-                      borderRadius: '12px',
-                      fontSize: '11px'
-                    }}>
-                      {log.entityType}
-                    </span>
+                    {log.previousTotalValue !== null && log.previousTotalValue !== undefined
+                      ? `₩${log.previousTotalValue.toLocaleString()}`
+                      : '-'
+                    }
+                  </td>
+                  <td style={{ 
+                    padding: '12px 16px',
+                    textAlign: 'center',
+                    color: '#059669',
+                    fontWeight: '600',
+                    fontSize: '11px'
+                  }}>
+                    {log.currentTotalValue !== null && log.currentTotalValue !== undefined
+                      ? `₩${log.currentTotalValue.toLocaleString()}`
+                      : '-'
+                    }
+                  </td>
+                  <td style={{ 
+                    padding: '12px 16px',
+                    textAlign: 'center'
+                  }}>
+                    {formatTotalChange(log.previousTotalValue, log.currentTotalValue) || '-'}
                   </td>
                   <td style={{ 
                     padding: '12px 16px',
                     textAlign: 'center',
                     color: '#6b7280',
-                    fontSize: '11px'
+                    fontSize: '10px'
                   }}>
                     {formatTimestamp(log.timestamp)}
-                  </td>
-                  <td style={{ 
-                    padding: '12px 16px',
-                    textAlign: 'center',
-                    fontSize: '11px'
-                  }}>
-                    {log.action.toUpperCase() === 'UPDATE' && (
-                      <details style={{ cursor: 'pointer' }}>
-                        <summary style={{ 
-                          color: '#6b7280',
-                          fontSize: '11px',
-                          listStyle: 'none'
-                        }}>
-                          📝 Changes
-                        </summary>
-                        <div style={{ 
-                          marginTop: '8px',
-                          padding: '8px',
-                          backgroundColor: '#f8fafc',
-                          borderRadius: '6px',
-                          textAlign: 'left',
-                          border: '1px solid #e5e7eb'
-                        }}>
-                          <div style={{ marginBottom: '4px', color: '#6b7280' }}>
-                            <strong>Before:</strong>
-                          </div>
-                          <div style={{ marginBottom: '8px', fontSize: '10px' }}>
-                            {formatValue(parseJsonValue(log.oldValue))}
-                          </div>
-                          <div style={{ marginBottom: '4px', color: '#6b7280' }}>
-                            <strong>After:</strong>
-                          </div>
-                          <div style={{ fontSize: '10px' }}>
-                            {formatValue(parseJsonValue(log.newValue))}
-                          </div>
-                        </div>
-                      </details>
-                    )}
-                    {(log.action.toUpperCase() === 'CREATE' || log.action.toUpperCase() === 'DELETE') && (
-                      <span style={{ color: '#6b7280' }}>-</span>
-                    )}
                   </td>
                 </tr>
               ))}
             </tbody>
-          </table>
+            </table>
+          </div>
         </div>
       )}
     </div>

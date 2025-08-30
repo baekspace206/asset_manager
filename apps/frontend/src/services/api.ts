@@ -44,6 +44,8 @@ export interface AuditLog {
   entityName: string;
   oldValue: string | null;
   newValue: string | null;
+  previousTotalValue: number | null;
+  currentTotalValue: number | null;
   timestamp: Date;
 }
 

@@ -34,7 +34,7 @@ export class PortfolioService {
     const snapshots = await this.getSnapshots();
     return snapshots.map(snapshot => ({
       date: snapshot.date.toISOString().split('T')[0],
-      value: Number(snapshot.totalValue)
+      value: parseFloat(snapshot.totalValue.toString())
     }));
   }
 }

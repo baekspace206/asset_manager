@@ -16,8 +16,14 @@ export class AssetsService {
   ) {}
 
   async create(dto: CreateAssetDto) {
+    const previousAssets = await this.findAll();
+    const previousTotal = previousAssets.reduce((sum, asset) => sum + Number(asset.amount), 0);
+    
     const asset = this.repo.create(dto);
     const savedAsset = await this.repo.save(asset);
+    
+    const currentAssets = await this.findAll();
+    const currentTotal = currentAssets.reduce((sum, asset) => sum + Number(asset.amount), 0);
     
     // Log audit
     await this.auditService.logAction(
@@ -26,7 +32,9 @@ export class AssetsService {
       savedAsset.id,
       savedAsset.name,
       null,
-      savedAsset
+      savedAsset,
+      previousTotal,
+      currentTotal
     );
     
     // Create portfolio snapshot
@@ -46,9 +54,15 @@ export class AssetsService {
   }
 
   async update(id: number, dto: UpdateAssetDto) {
+    const previousAssets = await this.findAll();
+    const previousTotal = previousAssets.reduce((sum, asset) => sum + Number(asset.amount), 0);
+    
     const oldAsset = await this.findOne(id);
     await this.repo.update(id, dto);
     const newAsset = await this.findOne(id);
+    
+    const currentAssets = await this.findAll();
+    const currentTotal = currentAssets.reduce((sum, asset) => sum + Number(asset.amount), 0);
     
     // Log audit
     await this.auditService.logAction(
@@ -57,7 +71,9 @@ export class AssetsService {
       newAsset.id,
       newAsset.name,
       oldAsset,
-      newAsset
+      newAsset,
+      previousTotal,
+      currentTotal
     );
     
     // Create portfolio snapshot
@@ -67,8 +83,14 @@ export class AssetsService {
   }
 
   async remove(id: number) {
+    const previousAssets = await this.findAll();
+    const previousTotal = previousAssets.reduce((sum, asset) => sum + Number(asset.amount), 0);
+    
     const asset = await this.findOne(id);
     await this.repo.delete(id);
+    
+    const currentAssets = await this.findAll();
+    const currentTotal = currentAssets.reduce((sum, asset) => sum + Number(asset.amount), 0);
     
     // Log audit
     await this.auditService.logAction(
@@ -77,7 +99,9 @@ export class AssetsService {
       asset.id,
       asset.name,
       asset,
-      null
+      null,
+      previousTotal,
+      currentTotal
     );
     
     // Create portfolio snapshot
