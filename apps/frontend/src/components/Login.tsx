@@ -14,16 +14,21 @@ const Login: React.FC = () => {
 
     try {
       if (isRegister) {
-        await register(username, password);
-        alert('Registration successful! Please login.');
-        setIsRegister(false);
+        const result = await register(username, password);
+        if (result.success) {
+          alert(result.message);
+          setIsRegister(false);
+          setUsername('');
+          setPassword('');
+        } else {
+          setError(result.message);
+        }
       } else {
         await login(username, password);
       }
-      setUsername('');
-      setPassword('');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'An error occurred');
+      const errorMessage = err.response?.data?.message || err.message || 'An error occurred';
+      setError(errorMessage);
     }
   };
 

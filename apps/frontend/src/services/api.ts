@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000';
+const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -17,10 +17,46 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+export enum UserRole {
+  ADMIN = 'admin',
+  USER = 'user'
+}
+
+export enum UserStatus {
+  PENDING = 'pending',
+  APPROVED = 'approved',
+  REJECTED = 'rejected'
+}
+
+export enum UserPermission {
+  VIEW = 'view',
+  EDIT = 'edit'
+}
+
 export interface User {
   id: number;
   username: string;
-  role: string;
+  role: UserRole;
+  status: UserStatus;
+  permission: UserPermission;
+  approvedBy?: string | null;
+  approvedAt?: Date | null;
+  rejectionReason?: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  isAdmin?: boolean;
+  isApproved?: boolean;
+  hasEditPermission?: boolean;
+}
+
+export interface AdminStats {
+  totalUsers: number;
+  pendingUsers: number;
+  approvedUsers: number;
+  rejectedUsers: number;
+  adminUsers: number;
+  editPermissionUsers: number;
+  viewPermissionUsers: number;
 }
 
 export interface Asset {
@@ -62,7 +98,34 @@ export const authAPI = {
     api.post('/auth/login', { username, password }).then(res => res.data),
   
   getProfile: (): Promise<User> =>
-    api.get('/profile').then(res => res.data),
+    api.get('/auth/profile').then(res => res.data),
+};
+
+export const userAPI = {
+  getProfile: (): Promise<User> =>
+    api.get('/users/profile').then(res => res.data),
+
+  changePassword: (oldPassword: string, newPassword: string): Promise<{ message: string }> =>
+    api.put('/users/change-password', { oldPassword, newPassword }).then(res => res.data),
+
+  // Admin functions
+  getPendingUsers: (): Promise<User[]> =>
+    api.get('/users/admin/pending').then(res => res.data),
+
+  getAllUsers: (): Promise<User[]> =>
+    api.get('/users/admin/all').then(res => res.data),
+
+  approveUser: (userId: number, permission: UserPermission): Promise<User> =>
+    api.post(`/users/admin/approve/${userId}`, { permission }).then(res => res.data),
+
+  rejectUser: (userId: number, reason: string): Promise<User> =>
+    api.post(`/users/admin/reject/${userId}`, { reason }).then(res => res.data),
+
+  updateUserPermission: (userId: number, permission: UserPermission): Promise<User> =>
+    api.put(`/users/admin/permission/${userId}`, { permission }).then(res => res.data),
+
+  getAdminStats: (): Promise<AdminStats> =>
+    api.get('/users/admin/stats').then(res => res.data),
 };
 
 export const assetAPI = {
@@ -90,6 +153,54 @@ export const portfolioAPI = {
 export const auditAPI = {
   getLogs: (): Promise<AuditLog[]> =>
     api.get('/audit/logs').then(res => res.data),
+};
+
+export interface LedgerEntry {
+  id: number;
+  date: string;
+  category: string;
+  description: string;
+  amount: number;
+  note?: string;
+  userId: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface MonthlyStats {
+  month: string;
+  categories: {
+    [category: string]: {
+      total: number;
+      count: number;
+      entries: LedgerEntry[];
+    };
+  };
+  totalAmount: number;
+}
+
+export const ledgerAPI = {
+  getAll: (): Promise<LedgerEntry[]> =>
+    api.get('/ledger').then(res => res.data),
+  
+  create: (entry: Omit<LedgerEntry, 'id' | 'userId' | 'createdAt' | 'updatedAt'>): Promise<LedgerEntry> =>
+    api.post('/ledger', entry).then(res => res.data),
+  
+  update: (id: number, entry: Partial<Omit<LedgerEntry, 'id' | 'userId' | 'createdAt' | 'updatedAt'>>): Promise<LedgerEntry> =>
+    api.patch(`/ledger/${id}`, entry).then(res => res.data),
+  
+  delete: (id: number): Promise<{ success: boolean }> =>
+    api.delete(`/ledger/${id}`).then(res => res.data),
+
+  getStats: (year?: number, month?: number): Promise<MonthlyStats[]> => {
+    const params = new URLSearchParams();
+    if (year) params.append('year', year.toString());
+    if (month) params.append('month', month.toString());
+    return api.get(`/ledger/stats?${params}`).then(res => res.data);
+  },
+
+  getCategories: (): Promise<string[]> =>
+    api.get('/ledger/categories').then(res => res.data),
 };
 
 export default api;
