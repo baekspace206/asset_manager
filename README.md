@@ -1,475 +1,314 @@
-# Asset Manager - Financial Portfolio Tracker
+# 💰 Asset Manager - Complete Financial Management Suite
 
-A full-stack financial asset portfolio management application built with NestJS (backend) and React (frontend). Track your investments, view portfolio growth over time, and monitor all asset changes with comprehensive audit logging.
+A full-stack financial management application with asset portfolio tracking and household expense management, built with NestJS and React.
 
-## Project Structure
+## ✨ Features Overview
+
+### 🎯 **Asset Portfolio Management**
+- **Real-time Portfolio Tracking:** Monitor your financial assets with live updates
+- **Advanced Analytics:** Growth charts, performance metrics, and historical snapshots
+- **Asset Categorization:** Organize investments by type with detailed notes
+- **Audit Logging:** Complete transaction history with user tracking
+
+### 📊 **Household Ledger System** ⭐ NEW
+- **Monthly Expense Tracking:** Categorize and track all household expenses
+- **Visual Analytics:** Color-coded category breakdowns with percentage distributions
+- **Interactive Dashboard:** Collapsible monthly views with detailed statistics
+- **Smart Insights:** Average spending, transaction counts, and trend analysis
+
+### 👥 **Advanced User Management**
+- **Role-Based Access Control:** Admin, User roles with granular permissions
+- **Permission Levels:** VIEW (read-only) and EDIT (full access) permissions
+- **User Approval Workflow:** Admin approval system for new registrations
+- **JWT Authentication:** Secure token-based authentication with auto-refresh
+
+### 🎨 **Modern User Experience**
+- **Responsive Design:** Mobile-first approach with desktop optimization
+- **Interactive Components:** Modal forms, progress bars, and visual feedback
+- **Real-time Updates:** Live data synchronization across all components
+- **Professional UI:** Clean, intuitive interface with accessibility support
+
+## 🏗️ Technical Architecture
 
 ```
-assetManager/
-├── apps/
-│   ├── backend/          # NestJS backend API
-│   └── frontend/         # React frontend application
-├── package.json          # Root package.json for concurrent execution
-└── README.md
+📦 Full Stack Architecture
+├── 🚀 Backend (NestJS + TypeScript)
+│   ├── 🗃️ TypeORM + SQLite Database
+│   ├── 🔐 JWT Authentication System
+│   ├── 🛡️ Role-Based Access Guards
+│   ├── 📝 Comprehensive Audit Logging
+│   └── 🧪 RESTful API with Validation
+├── ⚛️ Frontend (React + TypeScript)
+│   ├── 📱 Responsive UI Components
+│   ├── 🎯 Context API State Management
+│   ├── 🔄 Axios HTTP Client
+│   └── 🎨 Modern CSS Design
+└── 🏗️ Infrastructure
+    ├── 🌐 Nginx Reverse Proxy
+    ├── 📦 PM2 Process Management
+    └── 🔄 Automated Deployment
 ```
 
-## Features
-
-- 🏦 **Financial Asset Management**: Track houses, deposits, savings, stocks, cryptocurrency, parking accounts, and pensions
-- 💰 **Korean Won (₩) Support**: All amounts displayed in Korean currency
-- 📈 **Portfolio Growth Tracking**: Visual line charts showing daily portfolio value changes
-- 📋 **Audit Logging**: Complete activity log with before/after change tracking
-- 🔐 **JWT Authentication**: Secure user registration and login
-- 🎨 **Modern UI**: Clean, responsive design with category-based organization
-- 🏗️ **Monorepo Structure**: Backend and frontend in organized workspace
-
-## Tech Stack
-
-### Backend
-- **NestJS** - Node.js framework
-- **TypeORM** - ORM with SQLite database
-- **JWT** - Authentication
-- **bcrypt** - Password hashing
-- **better-sqlite3** - SQLite driver
-
-### Frontend
-- **React 19** - UI library
-- **TypeScript** - Type safety
-- **Recharts** - Data visualization
-- **Axios** - HTTP client
-- **React Router** - Navigation
-
-
-## Getting Started
+## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js (v16 or higher)
-- npm
-- pnpm
+- **Node.js** 18+ with npm/pnpm
+- **Nginx** for reverse proxy
+- **PM2** for process management (optional)
+- **Git** for version control
 
-### Installation
+### 🔧 Installation
 
-1. **Clone the repository**
+1. **Clone Repository:**
+   ```bash
+   git clone https://github.com/baekspace206/asset_manager.git
+   cd asset_manager
+   ```
+
+2. **Install Dependencies:**
+   ```bash
+   # Install all dependencies
+   npm run install:all
+   
+   # Or install individually
+   cd apps/backend && pnpm install && cd ../frontend && npm install
+   ```
+
+3. **Development Mode:**
+   ```bash
+   # Run both frontend and backend
+   npm run dev
+   
+   # Access the application
+   # Frontend: http://localhost:3001
+   # Backend API: http://localhost:3000
+   ```
+
+### 🌐 Production Deployment
+
+#### Backend Setup
 ```bash
-git clone <your-repo-url>
-cd assetManager
-```
-
-2. **Install dependencies**
-```bash
-pnpm install
-```
-
-### Running the Application
-
-**Start development servers**
-```bash
-pnpm dev
-```
-
-This will start:
-- Backend API server on `http://localhost:3000`
-- Frontend development server on `http://localhost:3001`
-
-#### Option 2: Run Individually
-
-**Backend only:**
-```bash
-npm run backend:dev
-# or
-cd apps/backend && pnpm run start:dev
-```
-
-**Frontend only:**
-```bash
-npm run frontend:dev
-# or
-cd apps/frontend && npm start
-```
-
-### Available Scripts
-
-- `npm run dev` - Run both frontend and backend concurrently
-- `npm run backend:dev` - Run backend only
-- `npm run frontend:dev` - Run frontend only
-- `npm run install:all` - Install dependencies for both apps
-
-### Backend Scripts (in apps/backend)
-- `pnpm run start:dev` - Start development server with hot reload
-- `pnpm run build` - Build for production
-- `pnpm run start:prod` - Start production server
-- `pnpm run test` - Run tests
-- `pnpm run lint` - Run linter
-
-### Frontend Scripts (in apps/frontend)
-- `npm start` - Start development server
-- `npm run build` - Build for production
-- `npm test` - Run tests
-- `npm run eject` - Eject from Create React App
-
-## Usage
-
-1. **Start the application**: Run `npm run dev` from the root directory
-2. **Open the frontend**: Navigate to `http://localhost:3001`
-3. **Register a new user**: Click "Register" and create an account
-4. **Login**: Use your credentials to login
-5. **Manage assets**: 
-   - Click "Add Asset" to create new assets
-   - Use Edit/Delete buttons to modify existing assets
-   - All data is persisted in the SQLite database
-
-## Production Deployment (Raspberry Pi)
-
-### Prerequisites for Raspberry Pi
-
-1. **Update system**
-```bash
-sudo apt update && sudo apt upgrade -y
-```
-
-2. **Install Node.js 18+ (recommended for ARM64)**
-```bash
-# Install Node.js via NodeSource
-curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-sudo apt-get install -y nodejs
-
-# Verify installation
-node --version
-npm --version
-```
-
-3. **Install pnpm**
-```bash
-npm install -g pnpm
-```
-
-4. **Install PM2 for process management**
-```bash
-npm install -g pm2
-```
-
-### Deployment Steps
-
-1. **Clone the repository on Raspberry Pi**
-```bash
-cd /home/pi  # or your preferred directory
-git clone <your-repo-url>
-cd assetManager
-```
-
-2. **Install dependencies**
-```bash
-pnpm install
-```
-
-3. **Build the applications**
-```bash
-# Build frontend for production
-cd apps/frontend
-pnpm build
-cd ../..
-
-# Build backend
-cd apps/backend  
-pnpm build
-cd ../..
-```
-
-4. **Create production environment file**
-```bash
-# Create .env file in apps/backend/
 cd apps/backend
-cat > .env << EOF
-NODE_ENV=production
-PORT=3000
-JWT_SECRET=your-super-secret-jwt-key-change-this
-DATABASE_PATH=./asset.db
-EOF
-cd ../..
-```
+pnpm install
+pnpm run build
 
-5. **Create PM2 ecosystem file**
-```bash
-cat > ecosystem.config.js << 'EOF'
-module.exports = {
-  apps: [
-    {
-      name: 'asset-manager-backend',
-      cwd: './apps/backend',
-      script: 'dist/main.js',
-      env: {
-        NODE_ENV: 'production',
-        PORT: 3000
-      },
-      instances: 1,
-      autorestart: true,
-      watch: false,
-      max_memory_restart: '1G'
-    }
-  ]
-};
-EOF
-```
-
-6. **Start the application with PM2**
-```bash
-pm2 start ecosystem.config.js
+# Using PM2 (recommended)
+pm2 start dist/main.js --name "asset-manager-backend"
 pm2 save
 pm2 startup
 ```
 
-7. **Serve frontend with nginx (recommended)**
-
-Install nginx:
+#### Frontend Build & Deploy
 ```bash
-sudo apt install nginx -y
+cd apps/frontend
+npm install
+
+# Build with memory optimization
+NODE_OPTIONS="--max-old-space-size=2048" npm run build
+
+# Deploy to nginx
+sudo cp -r build/* /var/www/asset-manager/
+sudo systemctl reload nginx
 ```
 
-Create nginx configuration:
-```bash
-sudo tee /etc/nginx/sites-available/asset-manager << 'EOF'
+#### Nginx Configuration
+```nginx
 server {
     listen 80;
-    server_name your-pi-ip-or-domain;
-
-    # Serve frontend static files
+    server_name _;
+    
+    # React static files
     location / {
-        root /home/pi/assetManager/apps/frontend/build;
-        index index.html index.htm;
+        root /var/www/asset-manager;
+        index index.html;
         try_files $uri $uri/ /index.html;
     }
-
-    # Proxy API requests to backend
+    
+    # API proxy to NestJS backend
     location /api/ {
         proxy_pass http://localhost:3000/;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_cache_bypass $http_upgrade;
     }
 }
-EOF
-
-# Enable the site
-sudo ln -s /etc/nginx/sites-available/asset-manager /etc/nginx/sites-enabled/
-sudo nginx -t
-sudo systemctl restart nginx
-sudo systemctl enable nginx
 ```
 
-8. **Update frontend API URL for production**
+## 🔐 Default Access & Security
 
-Edit `apps/frontend/src/services/api.ts`:
-```typescript
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://your-pi-ip/api';
+### Authentication
+- **Admin Account:** `jaemin` / `admin123`
+- **Test User:** `test` / `test123` (VIEW permission)
+- **JWT Tokens:** 1-hour expiration with automatic refresh
+
+### Permission System
+- **ADMIN Role:** Full system access + user management
+- **USER Role:** Asset/ledger access based on permission level
+- **VIEW Permission:** Read-only access to all data
+- **EDIT Permission:** Full CRUD operations
+
+## 📱 Feature Guide
+
+### 💼 Asset Portfolio
+1. **Add Assets:** Click "Add Financial Asset" → Enter details
+2. **Track Growth:** View portfolio charts and historical data
+3. **Monitor Changes:** Real-time updates with audit trail
+4. **Generate Reports:** Create snapshots for analysis
+
+### 📊 Household Ledger
+1. **Record Expenses:** Use "등록" button → Add expense details
+2. **Categorize:** Organize by category (식비, 교통비, 문화생활, etc.)
+3. **Visual Analysis:** View monthly breakdowns with color-coded cards
+4. **Track Trends:** Monitor spending patterns and averages
+
+### 👥 User Management (Admin)
+1. **Approve Users:** Review and approve new registrations
+2. **Assign Permissions:** Grant VIEW or EDIT access levels
+3. **Monitor Activity:** View user statistics and audit logs
+4. **System Health:** Track application usage and performance
+
+## 🛠️ Development
+
+### Project Structure
+```
+asset_manager/
+├── apps/
+│   ├── backend/                    # NestJS API
+│   │   ├── src/
+│   │   │   ├── assets/            # Asset management
+│   │   │   ├── ledger/            # Household ledger ⭐
+│   │   │   ├── users/             # User management
+│   │   │   ├── auth/              # Authentication
+│   │   │   ├── audit/             # Activity logging
+│   │   │   └── portfolio/         # Portfolio analytics
+│   │   └── dist/                  # Built files
+│   └── frontend/                  # React App
+│       ├── src/
+│       │   ├── components/        # UI Components
+│       │   │   ├── Ledger.tsx     # Expense tracking ⭐
+│       │   │   ├── LedgerModal.tsx # Add/Edit expenses ⭐
+│       │   │   └── AdminDashboard.tsx # User management ⭐
+│       │   ├── contexts/          # React Context
+│       │   └── services/          # API integration
+│       └── build/                 # Production build
+├── nginx.conf                     # Nginx configuration
+├── DEPLOYMENT.md                  # Detailed deployment guide
+└── README.md                      # This file
 ```
 
-Then rebuild the frontend:
+### 🔌 API Reference
+```
+Authentication:
+POST /api/auth/login               # User login
+POST /api/auth/register            # User registration
+GET  /api/auth/profile             # User profile with permissions
+
+Assets:
+GET    /api/assets                 # List all assets
+POST   /api/assets                 # Create asset (EDIT permission)
+PATCH  /api/assets/:id             # Update asset (EDIT permission)
+DELETE /api/assets/:id             # Delete asset (EDIT permission)
+
+Household Ledger: ⭐
+GET    /api/ledger                 # List entries
+GET    /api/ledger/stats           # Monthly statistics
+GET    /api/ledger/categories      # Category list
+POST   /api/ledger                 # Create entry (EDIT permission)
+PATCH  /api/ledger/:id             # Update entry (EDIT permission)
+DELETE /api/ledger/:id             # Delete entry (EDIT permission)
+
+User Management (Admin only):
+GET  /api/users/admin/pending      # Pending user approvals
+GET  /api/users/admin/all          # All users
+POST /api/users/admin/approve/:id  # Approve user
+POST /api/users/admin/reject/:id   # Reject user
+PUT  /api/users/admin/permission/:id # Update permissions
+```
+
+### 🧪 Development Commands
 ```bash
-cd apps/frontend
-pnpm build
-cd ../..
+# Root level
+npm run dev                        # Start both apps
+npm run backend:dev               # Backend only
+npm run frontend:dev              # Frontend only
+npm run install:all               # Install all dependencies
+
+# Backend (apps/backend)
+pnpm run start:dev                # Development with hot reload
+pnpm run build                    # Production build
+pnpm run test                     # Unit tests
+pnpm run lint                     # Code linting
+
+# Frontend (apps/frontend)
+npm start                         # Development server
+npm run build                     # Production build
+npm test                          # React tests
 ```
 
-### Managing the Application
+## 📊 Database Schema
 
-**View logs:**
-```bash
-pm2 logs asset-manager-backend
-```
+### Core Tables
+- **users:** User accounts, roles, permissions, approval status
+- **assets:** Financial assets with categories and audit tracking
+- **ledger_entries:** ⭐ Household expenses with categorization
+- **portfolio_snapshots:** Historical portfolio value tracking
+- **audit_logs:** Complete activity audit trail
 
-**Restart application:**
-```bash
-pm2 restart asset-manager-backend
-```
+### SQLite Features
+- **Auto-sync:** Schema updates automatically applied
+- **Performance:** Optimized queries with proper indexing
+- **Backup:** Automated backup strategies supported
+- **Migration:** TypeORM handles schema evolution
 
-**Stop application:**
-```bash
-pm2 stop asset-manager-backend
-```
+## 🚨 Troubleshooting
 
-**Monitor resources:**
-```bash
-pm2 monit
-```
+### Common Issues
+1. **Memory Issues:** Use `NODE_OPTIONS="--max-old-space-size=2048"`
+2. **Build Failures:** Add swap space: `sudo fallocate -l 2G /swapfile`
+3. **API Errors:** Check nginx proxy: `/api/` → `localhost:3000/`
+4. **Permission Denied:** Verify user approval status and permission level
 
-### Troubleshooting on Raspberry Pi
+### Log Locations
+- **Backend:** `pm2 logs asset-manager-backend`
+- **Nginx:** `/var/log/nginx/access.log`
+- **Frontend:** Browser DevTools Console
 
-1. **Memory issues during build:**
-```bash
-# Increase swap space
-sudo dphys-swapfile swapoff
-sudo nano /etc/dphys-swapfile  # Set CONF_SWAPSIZE=2048
-sudo dphys-swapfile setup
-sudo dphys-swapfile swapon
-```
+## 🤝 Contributing
 
-2. **SQLite compilation issues:**
-```bash
-# Install build tools
-sudo apt install build-essential python3-dev -y
-pnpm rebuild better-sqlite3
-```
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/new-feature`)
+3. Commit changes (`git commit -m 'Add new feature'`)
+4. Push to branch (`git push origin feature/new-feature`)
+5. Open Pull Request
 
-3. **Permission issues:**
-```bash
-# Fix ownership
-sudo chown -R pi:pi /home/pi/assetManager
-```
+### Guidelines
+- **Code Style:** Follow ESLint/Prettier configuration
+- **Testing:** Add tests for new features
+- **Documentation:** Update relevant docs
+- **Security:** Follow OWASP best practices
 
-## Database
+## 📄 License
 
-The application uses SQLite database located at `apps/backend/asset.db`. The database is automatically created on first run with the following tables:
+MIT License - see [LICENSE](LICENSE) file for details.
 
-- **user**: Stores user authentication data
-  - id (Primary Key)
-  - username (Unique)
-  - password (Hashed)
-  - role (Default: 'user')
+## 🙏 Acknowledgments
 
-- **asset**: Stores asset information
-  - id (Primary Key)
-  - name (Required)
-  - category (Optional)
-  - amount (Required, Decimal)
-  - note (Optional)
+- **NestJS Community** - Amazing backend framework
+- **React Team** - Powerful UI library
+- **TypeORM** - Excellent database abstraction
+- **Claude Code** - Development assistance
 
-- **portfolio_snapshot**: Stores daily portfolio values
-  - id (Primary Key)
-  - totalValue (Decimal)
-  - date (Timestamp)
+---
 
-- **audit_log**: Stores all asset change activities
-  - id (Primary Key)
-  - action (CREATE/UPDATE/DELETE)
-  - entityType (Asset)
-  - entityId (Foreign Key)
-  - entityName (Asset name)
-  - oldValue (JSON string)
-  - newValue (JSON string)
-  - timestamp (Timestamp)
+**🚀 Production-Ready Financial Management Suite**
 
-## API Documentation
+Built with ❤️ by **baekspace206** | Ready for deployment with comprehensive monitoring and documentation!
 
-### Authentication Endpoints
-
-#### Register User
-```http
-POST /auth/register
-Content-Type: application/json
-
-{
-  "username": "string",
-  "password": "string"
-}
-```
-
-#### Login User
-```http
-POST /auth/login
-Content-Type: application/json
-
-{
-  "username": "string",
-  "password": "string"
-}
-```
-
-#### Get Profile (Protected)
-```http
-GET /profile
-Authorization: Bearer <jwt-token>
-```
-
-### Asset Endpoints
-
-#### Get All Assets
-```http
-GET /assets
-```
-
-#### Create Asset
-```http
-POST /assets
-Content-Type: application/json
-
-{
-  "name": "string",
-  "category": "string",
-  "amount": "number",
-  "note": "string"
-}
-```
-
-#### Update Asset
-```http
-PATCH /assets/:id
-Content-Type: application/json
-
-{
-  "name": "string",
-  "category": "string",
-  "amount": "number",
-  "note": "string"
-}
-```
-
-#### Delete Asset
-```http
-DELETE /assets/:id
-```
-
-### Portfolio Endpoints
-
-#### Get Portfolio Growth Data
-```http
-GET /portfolio/growth
-```
-
-#### Create Portfolio Snapshot
-```http
-POST /portfolio/snapshot
-```
-
-### Audit Endpoints
-
-#### Get Audit Logs
-```http
-GET /audit/logs
-```
-
-## Technologies Used
-
-### Backend
-- NestJS
-- TypeORM
-- SQLite / better-sqlite3
-- JWT (JSON Web Tokens)
-- bcrypt
-- Passport.js
-
-### Frontend
-- React 19
-- TypeScript
-- Recharts (for portfolio growth charts)
-- Axios
-- React Context API
-- Create React App
-
-### Development Tools
-- concurrently (for running both apps)
-- pnpm (backend package manager)
-- npm (frontend package manager)
-
-## Development Notes
-
-- The backend runs on port 3000
-- The frontend runs on port 3001
-- CORS is configured to allow requests from the frontend
-- JWT tokens are stored in localStorage
-- Database synchronization is enabled in development mode
-- All passwords are hashed using bcrypt# asset_manager
+### Recent Updates ⭐
+- ✨ **Household Ledger System** with visual analytics
+- 🎨 **Enhanced UI/UX** with color-coded categories
+- 🔒 **Advanced Permission System** with granular controls
+- 📊 **Interactive Dashboards** with real-time statistics
+- 🌐 **Production Deployment** with nginx and PM2
+- 📚 **Complete Documentation** with deployment guides
