@@ -31,7 +31,7 @@ export class LedgerController {
     if (!user || !await this.usersService.hasEditPermission(user)) {
       throw new ForbiddenException('Edit permission required');
     }
-    return this.ledgerService.create(createLedgerEntryDto, req.user.userId);
+    return this.ledgerService.create(createLedgerEntryDto, req.user.userId, user.username);
   }
 
   @Get()
@@ -55,6 +55,12 @@ export class LedgerController {
     return this.ledgerService.getCategories(req.user.userId);
   }
 
+  @Get('logs')
+  getLogs(@Request() req, @Query('limit') limit?: string) {
+    const limitNum = limit ? parseInt(limit) : 50;
+    return this.ledgerService.getLogs(req.user.userId, limitNum);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string, @Request() req) {
     return this.ledgerService.findOne(+id, req.user.userId);
@@ -70,7 +76,7 @@ export class LedgerController {
     if (!user || !await this.usersService.hasEditPermission(user)) {
       throw new ForbiddenException('Edit permission required');
     }
-    return this.ledgerService.update(+id, updateLedgerEntryDto, req.user.userId);
+    return this.ledgerService.update(+id, updateLedgerEntryDto, req.user.userId, user.username);
   }
 
   @Delete(':id')
@@ -79,6 +85,6 @@ export class LedgerController {
     if (!user || !await this.usersService.hasEditPermission(user)) {
       throw new ForbiddenException('Edit permission required');
     }
-    return this.ledgerService.remove(+id, req.user.userId);
+    return this.ledgerService.remove(+id, req.user.userId, user.username);
   }
 }

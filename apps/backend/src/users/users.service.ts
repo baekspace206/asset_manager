@@ -12,35 +12,31 @@ export class UsersService {
   ) {}
 
   async onModuleInit() {
-    // Create jaemin admin account if it doesn't exist
+    // Create baek admin account if it doesn't exist
     await this.ensureAdminExists();
   }
 
   private async ensureAdminExists() {
-    const admin = await this.findOne('jaemin');
-    if (!admin) {
-      const hashedPassword = await bcrypt.hash('admin123', 10);
-      const adminUser = this.usersRepository.create({
-        username: 'jaemin',
-        password: hashedPassword,
-        role: UserRole.ADMIN,
-        status: UserStatus.APPROVED,
-        permission: UserPermission.EDIT,
-        approvedBy: 'system',
-        approvedAt: new Date(),
-      });
-      await this.usersRepository.save(adminUser);
-      console.log('Admin user "jaemin" created with password "admin123"');
-    } else if (admin.role !== UserRole.ADMIN) {
-      // Upgrade existing jaemin to admin
-      admin.role = UserRole.ADMIN;
-      admin.status = UserStatus.APPROVED;
-      admin.permission = UserPermission.EDIT;
-      admin.approvedBy = 'system';
-      admin.approvedAt = new Date();
-      await this.usersRepository.save(admin);
-      console.log('User "jaemin" upgraded to admin');
+    // Remove existing baek user if exists
+    const existingBaek = await this.findOne('baek');
+    if (existingBaek) {
+      await this.usersRepository.remove(existingBaek);
+      console.log('Existing "baek" user removed');
     }
+
+    // Create new admin baek user
+    const hashedPassword = await bcrypt.hash('admin123', 10);
+    const adminUser = this.usersRepository.create({
+      username: 'baek',
+      password: hashedPassword,
+      role: UserRole.ADMIN,
+      status: UserStatus.APPROVED,
+      permission: UserPermission.EDIT,
+      approvedBy: 'system',
+      approvedAt: new Date(),
+    });
+    await this.usersRepository.save(adminUser);
+    console.log('Admin user "baek" created with password "admin123"');
   }
 
   async findOne(username: string): Promise<User | undefined> {
@@ -158,5 +154,18 @@ export class UsersService {
 
   async hasEditPermission(user: User): Promise<boolean> {
     return user.permission === UserPermission.EDIT;
+  }
+
+  async updateUserRole(userId: number, role: UserRole, updatedBy: string): Promise<User> {
+    const user = await this.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    user.role = role;
+    user.approvedBy = updatedBy;
+    user.approvedAt = new Date();
+
+    return this.usersRepository.save(user);
   }
 }

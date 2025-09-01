@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
 import { LedgerEntry } from './entities/ledger-entry.entity';
+import { LedgerLog, LedgerLogAction } from './entities/ledger-log.entity';
 import { CreateLedgerEntryDto } from './dto/create-ledger-entry.dto';
 import { UpdateLedgerEntryDto } from './dto/update-ledger-entry.dto';
 
@@ -22,14 +23,21 @@ export class LedgerService {
   constructor(
     @InjectRepository(LedgerEntry)
     private ledgerRepository: Repository<LedgerEntry>,
+    @InjectRepository(LedgerLog)
+    private ledgerLogRepository: Repository<LedgerLog>,
   ) {}
 
-  async create(createLedgerEntryDto: CreateLedgerEntryDto, userId: number): Promise<LedgerEntry> {
+  async create(createLedgerEntryDto: CreateLedgerEntryDto, userId: number, username: string): Promise<LedgerEntry> {
     const entry = this.ledgerRepository.create({
       ...createLedgerEntryDto,
       userId,
     });
-    return this.ledgerRepository.save(entry);
+    const savedEntry = await this.ledgerRepository.save(entry);
+    
+    // Create log entry
+    await this.createLogEntry(savedEntry, userId, username, LedgerLogAction.CREATE);
+    
+    return savedEntry;
   }
 
   async findAll(userId: number): Promise<LedgerEntry[]> {
@@ -49,14 +57,31 @@ export class LedgerService {
     return entry;
   }
 
-  async update(id: number, updateLedgerEntryDto: UpdateLedgerEntryDto, userId: number): Promise<LedgerEntry> {
+  async update(id: number, updateLedgerEntryDto: UpdateLedgerEntryDto, userId: number, username: string): Promise<LedgerEntry> {
     const entry = await this.findOne(id, userId);
+    const previousData = JSON.stringify({
+      description: entry.description,
+      amount: entry.amount,
+      category: entry.category,
+      date: entry.date,
+      note: entry.note
+    });
+    
     Object.assign(entry, updateLedgerEntryDto);
-    return this.ledgerRepository.save(entry);
+    const updatedEntry = await this.ledgerRepository.save(entry);
+    
+    // Create log entry
+    await this.createLogEntry(updatedEntry, userId, username, LedgerLogAction.UPDATE, previousData);
+    
+    return updatedEntry;
   }
 
-  async remove(id: number, userId: number): Promise<{ success: boolean }> {
+  async remove(id: number, userId: number, username: string): Promise<{ success: boolean }> {
     const entry = await this.findOne(id, userId);
+    
+    // Create log entry before deletion
+    await this.createLogEntry(entry, userId, username, LedgerLogAction.DELETE);
+    
     await this.ledgerRepository.remove(entry);
     return { success: true };
   }
@@ -130,5 +155,41 @@ export class LedgerService {
       .getRawMany();
 
     return result.map(item => item.category).sort();
+  }
+
+  private async createLogEntry(
+    entry: LedgerEntry, 
+    userId: number, 
+    username: string, 
+    action: LedgerLogAction, 
+    previousData?: string
+  ): Promise<void> {
+    const logEntry = this.ledgerLogRepository.create({
+      entryId: entry.id,
+      userId,
+      username,
+      action,
+      description: entry.description,
+      amount: entry.amount,
+      category: entry.category,
+      date: entry.date,
+      note: entry.note,
+      previousData
+    });
+
+    await this.ledgerLogRepository.save(logEntry);
+  }
+
+  async getLogs(userId: number, limit: number = 50): Promise<LedgerLog[]> {
+    try {
+      return await this.ledgerLogRepository.find({
+        where: { userId },
+        order: { createdAt: 'DESC' },
+        take: limit
+      });
+    } catch (error) {
+      console.error('Error fetching ledger logs:', error);
+      return []; // Return empty array if table doesn't exist or other error
+    }
   }
 }

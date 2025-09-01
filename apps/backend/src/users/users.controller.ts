@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Put, Body, Param, UseGuards, Request, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UsersService } from './users.service';
-import { UserPermission } from './entities/user.entity';
+import { UserPermission, UserRole } from './entities/user.entity';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard)
@@ -149,5 +149,48 @@ export class UsersController {
     };
 
     return stats;
+  }
+
+  @Put('admin/role/:userId')
+  async updateUserRole(
+    @Param('userId') userId: number,
+    @Body() body: { role: UserRole },
+    @Request() req
+  ) {
+    const admin = await this.usersService.findById(req.user.userId);
+    if (!admin || !await this.usersService.isAdmin(admin)) {
+      throw new ForbiddenException('Admin access required');
+    }
+
+    const updatedUser = await this.usersService.updateUserRole(
+      userId,
+      body.role,
+      admin.username
+    );
+
+    const { password, ...userWithoutPassword } = updatedUser;
+    return userWithoutPassword;
+  }
+
+  @Post('admin/fix-baek')
+  async fixBaekAccount(@Request() req) {
+    const admin = await this.usersService.findById(req.user.userId);
+    if (!admin || !await this.usersService.isAdmin(admin)) {
+      throw new ForbiddenException('Admin access required');
+    }
+
+    const baekUser = await this.usersService.findOne('baek');
+    if (!baekUser) {
+      return { message: 'baek account not found' };
+    }
+
+    const updatedUser = await this.usersService.updateUserRole(
+      baekUser.id,
+      UserRole.ADMIN,
+      admin.username
+    );
+
+    const { password, ...userWithoutPassword } = updatedUser;
+    return { message: 'baek account promoted to admin', user: userWithoutPassword };
   }
 }
