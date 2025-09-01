@@ -179,6 +179,27 @@ export interface MonthlyStats {
   totalAmount: number;
 }
 
+export enum LedgerLogAction {
+  CREATE = 'create',
+  UPDATE = 'update',
+  DELETE = 'delete'
+}
+
+export interface LedgerLog {
+  id: number;
+  entryId: number;
+  userId: number;
+  username: string;
+  action: LedgerLogAction;
+  description: string;
+  amount: number;
+  category: string;
+  date: string;
+  note?: string;
+  previousData?: string;
+  createdAt: Date;
+}
+
 export const ledgerAPI = {
   getAll: (): Promise<LedgerEntry[]> =>
     api.get('/ledger').then(res => res.data),
@@ -201,6 +222,11 @@ export const ledgerAPI = {
 
   getCategories: (): Promise<string[]> =>
     api.get('/ledger/categories').then(res => res.data),
+
+  getLogs: (limit?: number): Promise<LedgerLog[]> => {
+    const params = limit ? `?limit=${limit}` : '';
+    return api.get(`/ledger/logs${params}`).then(res => res.data);
+  },
 };
 
 export default api;

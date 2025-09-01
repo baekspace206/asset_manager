@@ -86,13 +86,13 @@ const LedgerModal: React.FC<LedgerModalProps> = ({
         overflow: 'auto'
       }}>
         <h2 style={{ marginTop: 0 }}>
-          {editingEntry ? '가계부 수정' : '가계부 추가'}
+          {editingEntry ? 'Edit Entry' : 'Add Entry'}
         </h2>
         
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: '20px' }}>
             <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-              사용일자 *
+              Date *
             </label>
             <input
               type="date"
@@ -112,7 +112,7 @@ const LedgerModal: React.FC<LedgerModalProps> = ({
 
           <div style={{ marginBottom: '20px' }}>
             <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-              카테고리 *
+              Category *
             </label>
             <input
               list="categories"
@@ -120,7 +120,7 @@ const LedgerModal: React.FC<LedgerModalProps> = ({
               value={formData.category}
               onChange={handleInputChange}
               required
-              placeholder="카테고리를 입력하거나 선택하세요"
+              placeholder="Enter or select a category"
               style={{
                 width: '100%',
                 padding: '10px',
@@ -138,7 +138,7 @@ const LedgerModal: React.FC<LedgerModalProps> = ({
 
           <div style={{ marginBottom: '20px' }}>
             <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-              상세 내용 *
+              Description *
             </label>
             <input
               type="text"
@@ -146,7 +146,7 @@ const LedgerModal: React.FC<LedgerModalProps> = ({
               value={formData.description}
               onChange={handleInputChange}
               required
-              placeholder="상세 내용을 입력하세요"
+              placeholder="Enter description"
               style={{
                 width: '100%',
                 padding: '10px',
@@ -159,7 +159,7 @@ const LedgerModal: React.FC<LedgerModalProps> = ({
 
           <div style={{ marginBottom: '20px' }}>
             <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-              금액 *
+              Amount *
             </label>
             <input
               type="number"
@@ -168,7 +168,7 @@ const LedgerModal: React.FC<LedgerModalProps> = ({
               onChange={handleInputChange}
               required
               step="0.01"
-              placeholder="금액을 입력하세요"
+              placeholder="Enter amount"
               style={{
                 width: '100%',
                 padding: '10px',
@@ -181,13 +181,13 @@ const LedgerModal: React.FC<LedgerModalProps> = ({
 
           <div style={{ marginBottom: '30px' }}>
             <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-              메모
+              Note
             </label>
             <textarea
               name="note"
               value={formData.note}
               onChange={handleInputChange}
-              placeholder="추가 메모 (선택사항)"
+              placeholder="Additional notes (optional)"
               rows={3}
               style={{
                 width: '100%',
@@ -213,7 +213,7 @@ const LedgerModal: React.FC<LedgerModalProps> = ({
                 fontSize: '16px'
               }}
             >
-              취소
+              Cancel
             </button>
             <button
               type="submit"
@@ -227,7 +227,7 @@ const LedgerModal: React.FC<LedgerModalProps> = ({
                 fontSize: '16px'
               }}
             >
-              {editingEntry ? '수정' : '등록'}
+              {editingEntry ? 'Update' : 'Add'}
             </button>
           </div>
         </form>
