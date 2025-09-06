@@ -13,30 +13,33 @@ export class UsersService {
 
   async onModuleInit() {
     // Create baek admin account if it doesn't exist
-    await this.ensureAdminExists();
+    setTimeout(async () => {
+      await this.ensureAdminExists();
+    }, 1000); // Delay to ensure DB is ready
   }
 
   private async ensureAdminExists() {
-    // Remove existing baek user if exists
-    const existingBaek = await this.findOne('baek');
-    if (existingBaek) {
-      await this.usersRepository.remove(existingBaek);
-      console.log('Existing "baek" user removed');
-    }
+    try {
+      // Clear all existing users first
+      await this.usersRepository.clear();
+      console.log('All existing users cleared');
 
-    // Create new admin baek user
-    const hashedPassword = await bcrypt.hash('admin123', 10);
-    const adminUser = this.usersRepository.create({
-      username: 'baek',
-      password: hashedPassword,
-      role: UserRole.ADMIN,
-      status: UserStatus.APPROVED,
-      permission: UserPermission.EDIT,
-      approvedBy: 'system',
-      approvedAt: new Date(),
-    });
-    await this.usersRepository.save(adminUser);
-    console.log('Admin user "baek" created with password "admin123"');
+      // Create new admin baek user
+      const hashedPassword = await bcrypt.hash('admin123', 10);
+      const adminUser = this.usersRepository.create({
+        username: 'baek',
+        password: hashedPassword,
+        role: UserRole.ADMIN,
+        status: UserStatus.APPROVED,
+        permission: UserPermission.EDIT,
+        approvedBy: 'system',
+        approvedAt: new Date(),
+      });
+      await this.usersRepository.save(adminUser);
+      console.log('Admin user "baek" created with password "admin123"');
+    } catch (error) {
+      console.error('Error in ensureAdminExists:', error);
+    }
   }
 
   async findOne(username: string): Promise<User | undefined> {

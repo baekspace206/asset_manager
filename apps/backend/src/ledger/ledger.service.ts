@@ -87,33 +87,45 @@ export class LedgerService {
   }
 
   async getMonthlyStats(userId: number, year?: number, month?: number): Promise<MonthlyStats[]> {
+    // Validate userId to prevent NaN errors
+    if (!userId || isNaN(Number(userId))) {
+      console.error('Invalid userId provided to getMonthlyStats:', userId);
+      return [];
+    }
+
     let entries: LedgerEntry[] = [];
+    const validUserId = Number(userId);
     
-    if (year && month) {
-      const startDate = `${year}-${month.toString().padStart(2, '0')}-01`;
-      const endDate = `${year}-${month.toString().padStart(2, '0')}-31`;
-      entries = await this.ledgerRepository.find({
-        where: { 
-          userId,
-          date: Between(startDate, endDate) as any
-        },
-        order: { date: 'DESC', createdAt: 'DESC' }
-      });
-    } else if (year) {
-      const startDate = `${year}-01-01`;
-      const endDate = `${year}-12-31`;
-      entries = await this.ledgerRepository.find({
-        where: { 
-          userId,
-          date: Between(startDate, endDate) as any
-        },
-        order: { date: 'DESC', createdAt: 'DESC' }
-      });
-    } else {
-      entries = await this.ledgerRepository.find({
-        where: { userId },
-        order: { date: 'DESC', createdAt: 'DESC' }
-      });
+    try {
+      if (year && month) {
+        const startDate = `${year}-${month.toString().padStart(2, '0')}-01`;
+        const endDate = `${year}-${month.toString().padStart(2, '0')}-31`;
+        entries = await this.ledgerRepository.find({
+          where: { 
+            userId: validUserId,
+            date: Between(startDate, endDate) as any
+          },
+          order: { date: 'DESC', createdAt: 'DESC' }
+        });
+      } else if (year) {
+        const startDate = `${year}-01-01`;
+        const endDate = `${year}-12-31`;
+        entries = await this.ledgerRepository.find({
+          where: { 
+            userId: validUserId,
+            date: Between(startDate, endDate) as any
+          },
+          order: { date: 'DESC', createdAt: 'DESC' }
+        });
+      } else {
+        entries = await this.ledgerRepository.find({
+          where: { userId: validUserId },
+          order: { date: 'DESC', createdAt: 'DESC' }
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching monthly stats:', error);
+      return [];
     }
 
     const monthlyData: { [key: string]: MonthlyStats } = {};
@@ -148,13 +160,24 @@ export class LedgerService {
   }
 
   async getCategories(userId: number): Promise<string[]> {
-    const result = await this.ledgerRepository
-      .createQueryBuilder('entry')
-      .select('DISTINCT entry.category', 'category')
-      .where('entry.userId = :userId', { userId })
-      .getRawMany();
+    // Validate userId to prevent NaN errors
+    if (!userId || isNaN(Number(userId))) {
+      console.error('Invalid userId provided to getCategories:', userId);
+      return [];
+    }
 
-    return result.map(item => item.category).sort();
+    try {
+      const result = await this.ledgerRepository
+        .createQueryBuilder('entry')
+        .select('DISTINCT entry.category', 'category')
+        .where('entry.userId = :userId', { userId: Number(userId) })
+        .getRawMany();
+
+      return result.map(item => item.category).sort();
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      return [];
+    }
   }
 
   private async createLogEntry(
@@ -172,8 +195,8 @@ export class LedgerService {
       description: entry.description,
       amount: entry.amount,
       category: entry.category,
-      date: entry.date,
-      note: entry.note,
+      date: entry.date instanceof Date ? entry.date.toISOString().split('T')[0] : String(entry.date),
+      note: entry.note || '',
       previousData
     });
 

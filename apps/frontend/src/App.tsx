@@ -5,12 +5,13 @@ import Login from './components/Login';
 import AssetList from './components/AssetList';
 import AdminDashboard from './components/AdminDashboard';
 import Ledger from './components/Ledger';
+import Orders from './components/Orders';
 import { UserStatus } from './services/api';
 import './App.css';
 
 function AppContent() {
   const { user, loading, isAdmin, isApproved } = useAuth();
-  const [currentView, setCurrentView] = useState<'assets' | 'ledger' | 'admin'>('assets');
+  const [currentView, setCurrentView] = useState<'assets' | 'ledger' | 'orders' | 'admin'>('assets');
 
   if (loading) {
     return (
@@ -133,15 +134,104 @@ function AppContent() {
         onShowAdminDashboard={() => setCurrentView('admin')}
         onShowAssets={() => setCurrentView('assets')}
         onShowLedger={() => setCurrentView('ledger')}
+        onShowOrders={() => setCurrentView('orders')}
       />
       
-      <div style={{ backgroundColor: '#f8fafc', minHeight: 'calc(100vh - 80px)' }}>
+      {/* Quick Navigation Bar */}
+      <div style={{ 
+        backgroundColor: 'white', 
+        borderBottom: '1px solid #e5e7eb',
+        padding: '15px 20px',
+        display: 'flex',
+        gap: '10px',
+        justifyContent: 'center',
+        flexWrap: 'wrap'
+      }}>
+        <button
+          onClick={() => setCurrentView('assets')}
+          style={{
+            padding: '8px 16px',
+            backgroundColor: currentView === 'assets' ? '#007bff' : '#f8f9fa',
+            color: currentView === 'assets' ? 'white' : '#495057',
+            border: '1px solid #dee2e6',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: '500',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px'
+          }}
+        >
+          💼 Asset Management
+        </button>
+        <button
+          onClick={() => setCurrentView('ledger')}
+          style={{
+            padding: '8px 16px',
+            backgroundColor: currentView === 'ledger' ? '#28a745' : '#f8f9fa',
+            color: currentView === 'ledger' ? 'white' : '#495057',
+            border: '1px solid #dee2e6',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: '500',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px'
+          }}
+        >
+          📊 Financial Ledger
+        </button>
+        <button
+          onClick={() => setCurrentView('orders')}
+          style={{
+            padding: '8px 16px',
+            backgroundColor: currentView === 'orders' ? '#fd7e14' : '#f8f9fa',
+            color: currentView === 'orders' ? 'white' : '#495057',
+            border: '1px solid #dee2e6',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: '500',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px'
+          }}
+        >
+          🍽️ Food Orders
+        </button>
+        {isAdmin && (
+          <button
+            onClick={() => setCurrentView('admin')}
+            style={{
+              padding: '8px 16px',
+              backgroundColor: currentView === 'admin' ? '#6f42c1' : '#f8f9fa',
+              color: currentView === 'admin' ? 'white' : '#495057',
+              border: '1px solid #dee2e6',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '500',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            👑 Admin Dashboard
+          </button>
+        )}
+      </div>
+      
+      <div style={{ backgroundColor: '#f8fafc', minHeight: 'calc(100vh - 120px)' }}>
         {currentView === 'admin' && isAdmin ? (
           <div style={{ padding: '20px' }}>
             <AdminDashboard />
           </div>
         ) : currentView === 'ledger' ? (
           <Ledger />
+        ) : currentView === 'orders' ? (
+          <Orders />
         ) : (
           <AssetList />
         )}

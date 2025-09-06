@@ -7,9 +7,10 @@ interface HeaderProps {
   onShowAdminDashboard?: () => void;
   onShowAssets?: () => void;
   onShowLedger?: () => void;
+  onShowOrders?: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ onShowAdminDashboard, onShowAssets, onShowLedger }) => {
+const Header: React.FC<HeaderProps> = ({ onShowAdminDashboard, onShowAssets, onShowLedger, onShowOrders }) => {
   const { user, logout, isAdmin } = useAuth();
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
@@ -194,32 +195,61 @@ const Header: React.FC<HeaderProps> = ({ onShowAdminDashboard, onShowAssets, onS
                     >
                       💼 Asset Management
                     </button>
-                    <button
-                      onClick={() => {
-                        onShowLedger?.();
-                        setShowMenu(false);
-                      }}
-                      style={{
-                        width: '100%',
-                        padding: '12px 16px',
-                        textAlign: 'left',
-                        border: 'none',
-                        backgroundColor: 'transparent',
-                        color: '#1f2937',
-                        cursor: 'pointer',
-                        fontSize: '14px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        transition: 'background-color 0.2s'
-                      }}
-                      onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
-                      onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                    >
-                      📊 가계부
-                    </button>
                     <hr style={{ margin: 0, border: 'none', borderTop: '1px solid #e5e7eb' }} />
                   </>
+                )}
+                
+                <button
+                  onClick={() => {
+                    onShowLedger?.();
+                    setShowMenu(false);
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px',
+                    textAlign: 'left',
+                    border: 'none',
+                    backgroundColor: 'transparent',
+                    color: '#1f2937',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    transition: 'background-color 0.2s'
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
+                  onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  📊 Financial Ledger
+                </button>
+                <button
+                  onClick={() => {
+                    onShowOrders?.();
+                    setShowMenu(false);
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px',
+                    textAlign: 'left',
+                    border: 'none',
+                    backgroundColor: 'transparent',
+                    color: '#1f2937',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    transition: 'background-color 0.2s'
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
+                  onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  🍽️ Food Orders
+                </button>
+                
+                {isAdmin && (
+                  <hr style={{ margin: 0, border: 'none', borderTop: '1px solid #e5e7eb' }} />
                 )}
                 
                 <button

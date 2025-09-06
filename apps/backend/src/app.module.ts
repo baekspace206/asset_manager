@@ -6,6 +6,7 @@ import { UsersModule } from './users/users.module';
 import { PortfolioModule } from './portfolio/portfolio.module';
 import { AuditModule } from './audit/audit.module';
 import { LedgerModule } from './ledger/ledger.module';
+import { OrdersModule } from './orders/orders.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
@@ -23,6 +24,7 @@ import { AppService } from './app.service';
     PortfolioModule,
     AuditModule,
     LedgerModule,
+    OrdersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
