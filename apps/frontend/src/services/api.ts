@@ -229,4 +229,93 @@ export const ledgerAPI = {
   },
 };
 
+export interface Order {
+  id: number;
+  date: string;
+  foodType: string;
+  details: string;
+  status: 'pending' | 'completed';
+  completedImage?: string;
+  completedComment?: string;
+  completedAt?: string;
+  createdAt: string;
+}
+
+export interface CreateOrderDto {
+  date: string;
+  foodType: string;
+  details: string;
+}
+
+export interface CompleteOrderDto {
+  restaurantName: string;
+  foodImage: string;
+  rating: number;
+  rankComment?: string;
+}
+
+export const orderAPI = {
+  getPending: (): Promise<Order[]> =>
+    api.get('/orders/pending').then(res => res.data),
+  
+  getCompleted: (): Promise<Order[]> =>
+    api.get('/orders/completed').then(res => res.data),
+  
+  create: (order: CreateOrderDto): Promise<Order> =>
+    api.post('/orders', order).then(res => res.data),
+  
+  update: (id: number, order: Partial<Order>): Promise<Order> =>
+    api.patch(`/orders/${id}`, order).then(res => res.data),
+  
+  complete: (id: number, data: CompleteOrderDto): Promise<Order> =>
+    api.post(`/orders/${id}/complete`, data).then(res => res.data),
+  
+  delete: (id: number): Promise<{ success: boolean }> =>
+    api.delete(`/orders/${id}`).then(res => res.data),
+};
+
+export interface FoodRank {
+  id: number;
+  orderId: number;
+  foodType: string;
+  restaurantName: string;
+  foodImage: string;
+  rating: number;
+  date: string;
+  comment?: string;
+  createdAt: string;
+}
+
+export interface UpdateFoodRankDto {
+  foodType?: string;
+  restaurantName?: string;
+  foodImage?: string;
+  rating?: number;
+  date?: string;
+  comment?: string;
+}
+
+export interface CreateFoodRankDto {
+  foodType: string;
+  restaurantName: string;
+  foodImage: string;
+  rating: number;
+  date: string;
+  comment?: string;
+}
+
+export const foodRankAPI = {
+  getAll: (): Promise<FoodRank[]> =>
+    api.get('/food-ranks').then(res => res.data),
+  
+  create: (data: CreateFoodRankDto): Promise<FoodRank> =>
+    api.post('/food-ranks', data).then(res => res.data),
+  
+  update: (id: number, data: UpdateFoodRankDto): Promise<FoodRank> =>
+    api.patch(`/food-ranks/${id}`, data).then(res => res.data),
+  
+  delete: (id: number): Promise<{ success: boolean }> =>
+    api.delete(`/food-ranks/${id}`).then(res => res.data),
+};
+
 export default api;

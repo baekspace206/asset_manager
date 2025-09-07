@@ -1,33 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import { orderAPI, Order, CreateOrderDto, CompleteOrderDto } from '../services/api';
 import FoodRank from './FoodRank';
 
-interface Order {
-  id: number;
-  date: string;
-  foodType: string;
-  details: string;
-  status: 'pending' | 'completed';
-  completedImage?: string;
-  completedComment?: string;
-  completedAt?: string;
-  createdAt: string;
-}
-
-interface CreateOrderDto {
-  date: string;
-  foodType: string;
-  details: string;
-}
-
-interface CompleteOrderDto {
-  completedImage?: string;
-  completedComment?: string;
-  restaurantName: string;
-  foodImage: string;
-  rating: number;
-  rankComment?: string;
-}
 
 const Orders: React.FC = () => {
   const [pendingOrders, setPendingOrders] = useState<Order[]>([]);
@@ -40,8 +14,6 @@ const Orders: React.FC = () => {
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
   const [completingOrder, setCompletingOrder] = useState<Order | null>(null);
   const [completeForm, setCompleteForm] = useState<CompleteOrderDto>({
-    completedImage: '',
-    completedComment: '',
     restaurantName: '',
     foodImage: '',
     rating: 5,
@@ -52,22 +24,15 @@ const Orders: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const API_BASE_URL = '/api';
-
-  const getAuthHeaders = () => {
-    const token = localStorage.getItem('token');
-    return { Authorization: `Bearer ${token}` };
-  };
-
   const fetchOrders = useCallback(async () => {
     try {
       setLoading(true);
-      const [pendingRes, completedRes] = await Promise.all([
-        axios.get(`${API_BASE_URL}/orders/pending`, { headers: getAuthHeaders() }),
-        axios.get(`${API_BASE_URL}/orders/completed`, { headers: getAuthHeaders() })
+      const [pendingOrders, completedOrders] = await Promise.all([
+        orderAPI.getPending(),
+        orderAPI.getCompleted()
       ]);
-      setPendingOrders(pendingRes.data);
-      setCompletedOrders(completedRes.data);
+      setPendingOrders(pendingOrders);
+      setCompletedOrders(completedOrders);
       setError(null);
     } catch (err: any) {
       setError('Failed to fetch orders: ' + (err.response?.data?.message || err.message));
@@ -84,7 +49,7 @@ const Orders: React.FC = () => {
     e.preventDefault();
     try {
       setLoading(true);
-      await axios.post(`${API_BASE_URL}/orders`, newOrder, { headers: getAuthHeaders() });
+      await orderAPI.create(newOrder);
       setNewOrder({ date: '', foodType: '', details: '' });
       await fetchOrders();
       setError(null);
@@ -101,11 +66,11 @@ const Orders: React.FC = () => {
 
     try {
       setLoading(true);
-      await axios.patch(`${API_BASE_URL}/orders/${editingOrder.id}`, {
+      await orderAPI.update(editingOrder.id, {
         date: editingOrder.date,
         foodType: editingOrder.foodType,
         details: editingOrder.details
-      }, { headers: getAuthHeaders() });
+      });
       setEditingOrder(null);
       await fetchOrders();
       setError(null);
@@ -122,11 +87,9 @@ const Orders: React.FC = () => {
 
     try {
       setLoading(true);
-      await axios.post(`${API_BASE_URL}/orders/${completingOrder.id}/complete`, completeForm, { headers: getAuthHeaders() });
+      await orderAPI.complete(completingOrder.id, completeForm);
       setCompletingOrder(null);
       setCompleteForm({ 
-        completedImage: '', 
-        completedComment: '',
         restaurantName: '',
         foodImage: '',
         rating: 5,
@@ -146,7 +109,7 @@ const Orders: React.FC = () => {
 
     try {
       setLoading(true);
-      await axios.delete(`${API_BASE_URL}/orders/${id}`, { headers: getAuthHeaders() });
+      await orderAPI.delete(id);
       await fetchOrders();
       setError(null);
     } catch (err: any) {
@@ -176,82 +139,6 @@ const Orders: React.FC = () => {
         </div>
       )}
 
-      {/* Order Form */}
-      <div style={{ 
-        backgroundColor: '#f8f9fa', 
-        padding: '20px', 
-        borderRadius: '8px', 
-        marginBottom: '20px' 
-      }}>
-        <h3>📝 New Food Order</h3>
-        <form onSubmit={handleCreateOrder} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-            <div>
-              <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Date:</label>
-              <input
-                type="date"
-                value={newOrder.date}
-                onChange={(e) => setNewOrder({ ...newOrder, date: e.target.value })}
-                required
-                style={{ 
-                  width: '100%', 
-                  padding: '8px', 
-                  borderRadius: '4px', 
-                  border: '1px solid #ddd' 
-                }}
-              />
-            </div>
-            <div>
-              <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Food Type:</label>
-              <input
-                type="text"
-                value={newOrder.foodType}
-                onChange={(e) => setNewOrder({ ...newOrder, foodType: e.target.value })}
-                placeholder="e.g., Korean, Chinese, Pizza"
-                required
-                style={{ 
-                  width: '100%', 
-                  padding: '8px', 
-                  borderRadius: '4px', 
-                  border: '1px solid #ddd' 
-                }}
-              />
-            </div>
-          </div>
-          <div>
-            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Details:</label>
-            <textarea
-              value={newOrder.details}
-              onChange={(e) => setNewOrder({ ...newOrder, details: e.target.value })}
-              placeholder="Order details, preferences, quantity, etc."
-              required
-              rows={3}
-              style={{ 
-                width: '100%', 
-                padding: '8px', 
-                borderRadius: '4px', 
-                border: '1px solid #ddd',
-                resize: 'vertical'
-              }}
-            />
-          </div>
-          <button 
-            type="submit" 
-            disabled={loading}
-            style={{
-              padding: '12px 24px',
-              backgroundColor: '#007bff',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: loading ? 'not-allowed' : 'pointer',
-              fontSize: '16px'
-            }}
-          >
-            {loading ? 'Creating...' : 'Create Order'}
-          </button>
-        </form>
-      </div>
 
       {/* Main Tabs */}
       <div style={{ 
@@ -691,79 +578,6 @@ const Orders: React.FC = () => {
               <strong>Details:</strong> {completingOrder.details}
             </div>
             <form onSubmit={handleCompleteOrder} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-              <div style={{ 
-                backgroundColor: '#e3f2fd', 
-                padding: '15px', 
-                borderRadius: '6px', 
-                marginBottom: '10px' 
-              }}>
-                <h4 style={{ margin: '0 0 10px 0', color: '#1565c0' }}>📋 Order Completion</h4>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                  <div>
-                    <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-                      📸 Order Photo:
-                    </label>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          const reader = new FileReader();
-                          reader.onload = (e) => {
-                            setCompleteForm({ 
-                              ...completeForm, 
-                              completedImage: e.target?.result as string 
-                            });
-                          };
-                          reader.readAsDataURL(file);
-                        }
-                      }}
-                      style={{ 
-                        width: '100%', 
-                        padding: '8px', 
-                        borderRadius: '4px', 
-                        border: '1px solid #ddd' 
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-                      📸 Or Photo URL:
-                    </label>
-                    <input
-                      type="url"
-                      value={completeForm.completedImage || ''}
-                      onChange={(e) => setCompleteForm({ ...completeForm, completedImage: e.target.value })}
-                      placeholder="https://example.com/photo.jpg"
-                      style={{ 
-                        width: '100%', 
-                        padding: '8px', 
-                        borderRadius: '4px', 
-                        border: '1px solid #ddd' 
-                      }}
-                    />
-                  </div>
-                </div>
-                <div style={{ marginTop: '15px' }}>
-                  <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-                    💬 Completion Notes (optional):
-                  </label>
-                  <textarea
-                    value={completeForm.completedComment || ''}
-                    onChange={(e) => setCompleteForm({ ...completeForm, completedComment: e.target.value })}
-                    placeholder="Any notes about the order completion..."
-                    rows={2}
-                    style={{ 
-                      width: '100%', 
-                      padding: '8px', 
-                      borderRadius: '4px', 
-                      border: '1px solid #ddd',
-                      resize: 'vertical'
-                    }}
-                  />
-                </div>
-              </div>
 
               <div style={{ 
                 backgroundColor: '#fff3e0', 
@@ -820,44 +634,29 @@ const Orders: React.FC = () => {
                   <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
                     📸 Food Photo:
                   </label>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          const reader = new FileReader();
-                          reader.onload = (e) => {
-                            setCompleteForm({ 
-                              ...completeForm, 
-                              foodImage: e.target?.result as string 
-                            });
-                          };
-                          reader.readAsDataURL(file);
-                        }
-                      }}
-                      style={{ 
-                        width: '100%', 
-                        padding: '8px', 
-                        borderRadius: '4px', 
-                        border: '1px solid #ddd' 
-                      }}
-                    />
-                    <input
-                      type="url"
-                      value={completeForm.foodImage}
-                      onChange={(e) => setCompleteForm({ ...completeForm, foodImage: e.target.value })}
-                      placeholder="Or photo URL"
-                      required
-                      style={{ 
-                        width: '100%', 
-                        padding: '8px', 
-                        borderRadius: '4px', 
-                        border: '1px solid #ddd' 
-                      }}
-                    />
-                  </div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                          setCompleteForm({ 
+                            ...completeForm, 
+                            foodImage: e.target?.result as string 
+                          });
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                    style={{ 
+                      width: '100%', 
+                      padding: '8px', 
+                      borderRadius: '4px', 
+                      border: '1px solid #ddd' 
+                    }}
+                  />
                 </div>
                 <div style={{ marginTop: '15px' }}>
                   <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
@@ -899,8 +698,6 @@ const Orders: React.FC = () => {
                   onClick={() => {
                     setCompletingOrder(null);
                     setCompleteForm({ 
-                      completedImage: '', 
-                      completedComment: '',
                       restaurantName: '',
                       foodImage: '',
                       rating: 5,

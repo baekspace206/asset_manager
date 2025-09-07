@@ -17,6 +17,7 @@ export class FoodRankService {
       ...createFoodRankDto,
       userId,
       date: new Date(createFoodRankDto.date),
+      orderId: createFoodRankDto.orderId || undefined,
     });
     return this.foodRankRepository.save(foodRank);
   }

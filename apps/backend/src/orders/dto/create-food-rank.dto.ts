@@ -1,9 +1,9 @@
 import { IsNotEmpty, IsString, IsNumber, IsDateString, IsOptional, Min, Max } from 'class-validator';
 
 export class CreateFoodRankDto {
-  @IsNotEmpty()
+  @IsOptional()
   @IsNumber()
-  orderId: number;
+  orderId?: number;
 
   @IsNotEmpty()
   @IsString()

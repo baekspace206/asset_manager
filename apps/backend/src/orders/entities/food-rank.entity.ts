@@ -8,7 +8,7 @@ export class FoodRank {
   @Column()
   userId: number;
 
-  @Column()
+  @Column({ nullable: true })
   orderId: number;
 
   @Column()
