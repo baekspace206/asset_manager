@@ -74,7 +74,7 @@ const Header: React.FC<HeaderProps> = ({ onShowAdminDashboard, onShowAssets, onS
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <h1 style={{ margin: 0, fontSize: '1.5rem', fontWeight: '700' }}>
-            💰 Asset Manager
+            🌰🌳🐿️ Tori Fam Hub
           </h1>
           {isAdmin && (
             <span style={{
