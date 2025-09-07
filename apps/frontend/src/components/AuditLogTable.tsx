@@ -61,30 +61,30 @@ const AuditLogTable: React.FC = () => {
     });
   };
 
-  const parseJsonValue = (jsonString: string | null) => {
-    if (!jsonString) return null;
-    try {
-      return JSON.parse(jsonString);
-    } catch {
-      return jsonString;
-    }
-  };
+  // const parseJsonValue = (jsonString: string | null) => {
+  //   if (!jsonString) return null;
+  //   try {
+  //     return JSON.parse(jsonString);
+  //   } catch {
+  //     return jsonString;
+  //   }
+  // };
 
-  const formatValue = (value: any) => {
-    if (!value) return '-';
-    if (typeof value === 'object') {
-      return (
-        <div style={{ fontSize: '12px', color: '#6b7280' }}>
-          {Object.entries(value).map(([key, val]) => (
-            <div key={key}>
-              <strong>{key}:</strong> {val?.toString() || 'null'}
-            </div>
-          ))}
-        </div>
-      );
-    }
-    return value.toString();
-  };
+  // const formatValue = (value: any) => {
+  //   if (!value) return '-';
+  //   if (typeof value === 'object') {
+  //     return (
+  //       <div style={{ fontSize: '12px', color: '#6b7280' }}>
+  //         {Object.entries(value).map(([key, val]) => (
+  //           <div key={key}>
+  //             <strong>{key}:</strong> {val?.toString() || 'null'}
+  //           </div>
+  //         ))}
+  //       </div>
+  //     );
+  //   }
+  //   return value.toString();
+  // };
 
   const formatTotalChange = (previous: number | null, current: number | null) => {
     if (previous === null || current === null) return null;

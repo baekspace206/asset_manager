@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ledgerAPI, LedgerEntry, MonthlyStats, LedgerLog, LedgerLogAction } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import LedgerModal from './LedgerModal';
@@ -17,11 +17,7 @@ const Ledger: React.FC = () => {
 
   const { hasEditPermission } = useAuth();
 
-  useEffect(() => {
-    fetchData();
-  }, [selectedYear]);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       const [statsData, categoriesData] = await Promise.all([
@@ -44,7 +40,11 @@ const Ledger: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedYear]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const handleAddEntry = async (entryData: Omit<LedgerEntry, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => {
     try {

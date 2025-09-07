@@ -65,7 +65,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const register = async (username: string, password: string) => {
     try {
-      const newUser = await authAPI.register(username, password);
+      await authAPI.register(username, password);
       return {
         success: true,
         message: 'Registration successful! Your account is pending admin approval. You will be notified once approved.'

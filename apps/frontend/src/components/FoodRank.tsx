@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 
 interface FoodRank {
@@ -22,7 +22,7 @@ interface UpdateFoodRankDto {
   comment?: string;
 }
 
-const FoodRank: React.FC = () => {
+const FoodRankComponent: React.FC = () => {
   const [foodRanks, setFoodRanks] = useState<FoodRank[]>([]);
   const [editingRank, setEditingRank] = useState<FoodRank | null>(null);
   const [editForm, setEditForm] = useState<UpdateFoodRankDto>({});
@@ -38,22 +38,23 @@ const FoodRank: React.FC = () => {
     return { Authorization: `Bearer ${token}` };
   };
 
-  useEffect(() => {
-    fetchFoodRanks();
-  }, []);
-
-  const fetchFoodRanks = async () => {
+  const fetchFoodRanks = useCallback(async () => {
     try {
       setLoading(true);
       const response = await axios.get(`${API_BASE_URL}/food-ranks`, { headers: getAuthHeaders() });
       setFoodRanks(response.data);
-      setError(null);
-    } catch (err: any) {
-      setError('Failed to fetch food ranks: ' + (err.response?.data?.message || err.message));
+    } catch (err) {
+      setError('Failed to fetch food ranks');
+      console.error('Error fetching food ranks:', err);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchFoodRanks();
+  }, [fetchFoodRanks]);
+
 
   const handleUpdateRank = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -480,4 +481,4 @@ const FoodRank: React.FC = () => {
   );
 };
 
-export default FoodRank;
+export default FoodRankComponent;

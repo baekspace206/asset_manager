@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import FoodRank from './FoodRank';
 
@@ -59,11 +59,7 @@ const Orders: React.FC = () => {
     return { Authorization: `Bearer ${token}` };
   };
 
-  useEffect(() => {
-    fetchOrders();
-  }, []);
-
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     try {
       setLoading(true);
       const [pendingRes, completedRes] = await Promise.all([
@@ -78,7 +74,11 @@ const Orders: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchOrders();
+  }, [fetchOrders]);
 
   const handleCreateOrder = async (e: React.FormEvent) => {
     e.preventDefault();

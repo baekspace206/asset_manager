@@ -10,7 +10,7 @@ import { UserStatus } from './services/api';
 import './App.css';
 
 function AppContent() {
-  const { user, loading, isAdmin, isApproved } = useAuth();
+  const { user, loading, isAdmin } = useAuth();
   const [currentView, setCurrentView] = useState<'assets' | 'ledger' | 'orders' | 'admin'>('assets');
 
   if (loading) {
