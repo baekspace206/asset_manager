@@ -1,0 +1,78 @@
+name: Build and Deploy to Production
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: |
+          apps/frontend/package-lock.json
+          apps/backend/package-lock.json
+    
+    - name: Install frontend dependencies
+      run: |
+        cd apps/frontend
+        npm ci
+    
+    - name: Build frontend
+      run: |
+        cd apps/frontend
+        NODE_OPTIONS="--max-old-space-size=2048" npm run build
+    
+    - name: Install backend dependencies
+      run: |
+        cd apps/backend
+        npm ci
+    
+    - name: Build backend
+      run: |
+        cd apps/backend
+        npm run build
+    
+    - name: Create deployment commit
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        
+        # Create production branch if it doesn't exist
+        git checkout -b production || git checkout production
+        git merge main --no-edit
+        
+        # Add build files
+        git add apps/frontend/build/ -f
+        git add apps/backend/dist/ -f
+        
+        # Check if there are changes to commit
+        if git diff --staged --quiet; then
+          echo "No changes to commit"
+        else
+          git commit -m "🚀 Deploy: $(date '+%Y-%m-%d %H:%M:%S')"
+          git push origin production --force
+        fi
+    
+    - name: Deployment Summary
+      run: |
+        echo "✅ Frontend built successfully"
+        echo "✅ Backend built successfully"
+        echo "✅ Deployment files pushed to production branch"
+        echo ""
+        echo "🔧 To deploy on Raspberry Pi, run:"
+        echo "git fetch origin"
+        echo "git checkout production"
+        echo "git pull origin production"
+        echo "./scripts/deploy-pi.sh"
