@@ -20,7 +20,6 @@ const FoodRankComponent: React.FC = () => {
     date: new Date().toISOString().split('T')[0],
     comment: ''
   });
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewImage, setPreviewImage] = useState<string>('');
 
   const fetchFoodRanks = useCallback(async () => {
@@ -52,8 +51,6 @@ const FoodRankComponent: React.FC = () => {
         return;
       }
 
-      setSelectedFile(file);
-      
       // 미리보기 생성
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -75,7 +72,6 @@ const FoodRankComponent: React.FC = () => {
       date: new Date().toISOString().split('T')[0],
       comment: ''
     });
-    setSelectedFile(null);
     setPreviewImage('');
   };
 
