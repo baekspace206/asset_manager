@@ -318,4 +318,40 @@ export const foodRankAPI = {
     api.delete(`/food-ranks/${id}`).then(res => res.data),
 };
 
+export interface Diary {
+  id: number;
+  userId: number;
+  date: string;
+  content: string;
+  image?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateDiaryDto {
+  date: string;
+  content: string;
+  image?: string;
+}
+
+export interface UpdateDiaryDto {
+  date?: string;
+  content?: string;
+  image?: string;
+}
+
+export const diaryAPI = {
+  getAll: (): Promise<Diary[]> =>
+    api.get('/diary').then(res => res.data),
+  
+  create: (data: CreateDiaryDto): Promise<Diary> =>
+    api.post('/diary', data).then(res => res.data),
+  
+  update: (id: number, data: UpdateDiaryDto): Promise<Diary> =>
+    api.patch(`/diary/${id}`, data).then(res => res.data),
+  
+  delete: (id: number): Promise<{ success: boolean }> =>
+    api.delete(`/diary/${id}`).then(res => res.data),
+};
+
 export default api;

@@ -8,9 +8,10 @@ interface HeaderProps {
   onShowAssets?: () => void;
   onShowLedger?: () => void;
   onShowOrders?: () => void;
+  onShowDiary?: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ onShowAdminDashboard, onShowAssets, onShowLedger, onShowOrders }) => {
+const Header: React.FC<HeaderProps> = ({ onShowAdminDashboard, onShowAssets, onShowLedger, onShowOrders, onShowDiary }) => {
   const { user, logout, isAdmin } = useAuth();
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
@@ -246,6 +247,30 @@ const Header: React.FC<HeaderProps> = ({ onShowAdminDashboard, onShowAssets, onS
                   onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
                   🍽️ Food Orders
+                </button>
+                <button
+                  onClick={() => {
+                    onShowDiary?.();
+                    setShowMenu(false);
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px',
+                    textAlign: 'left',
+                    border: 'none',
+                    backgroundColor: 'transparent',
+                    color: '#1f2937',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    transition: 'background-color 0.2s'
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
+                  onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  📔 My Diary
                 </button>
                 
                 {isAdmin && (

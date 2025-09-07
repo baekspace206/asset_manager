@@ -6,12 +6,13 @@ import AssetList from './components/AssetList';
 import AdminDashboard from './components/AdminDashboard';
 import Ledger from './components/Ledger';
 import Orders from './components/Orders';
+import Diary from './components/Diary';
 import { UserStatus } from './services/api';
 import './App.css';
 
 function AppContent() {
   const { user, loading, isAdmin } = useAuth();
-  const [currentView, setCurrentView] = useState<'assets' | 'ledger' | 'orders' | 'admin'>('assets');
+  const [currentView, setCurrentView] = useState<'assets' | 'ledger' | 'orders' | 'diary' | 'admin'>('assets');
 
   if (loading) {
     return (
@@ -135,6 +136,7 @@ function AppContent() {
         onShowAssets={() => setCurrentView('assets')}
         onShowLedger={() => setCurrentView('ledger')}
         onShowOrders={() => setCurrentView('orders')}
+        onShowDiary={() => setCurrentView('diary')}
       />
       
       {/* Quick Navigation Bar */}
@@ -201,6 +203,24 @@ function AppContent() {
         >
           🍽️ Food Orders
         </button>
+        <button
+          onClick={() => setCurrentView('diary')}
+          style={{
+            padding: '8px 16px',
+            backgroundColor: currentView === 'diary' ? '#e83e8c' : '#f8f9fa',
+            color: currentView === 'diary' ? 'white' : '#495057',
+            border: '1px solid #dee2e6',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: '500',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px'
+          }}
+        >
+          📔 My Diary
+        </button>
         {isAdmin && (
           <button
             onClick={() => setCurrentView('admin')}
@@ -232,6 +252,8 @@ function AppContent() {
           <Ledger />
         ) : currentView === 'orders' ? (
           <Orders />
+        ) : currentView === 'diary' ? (
+          <Diary />
         ) : (
           <AssetList />
         )}
