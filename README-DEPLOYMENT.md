@@ -44,8 +44,12 @@
 
 ### GitHub Secrets 설정 (자동 배포용)
 
-GitHub 저장소의 Settings > Secrets and variables > Actions에서 다음 secrets를 추가하세요:
+GitHub 저장소의 Settings > Secrets and variables > Actions에서 다음을 추가하세요:
 
+**Variables:**
+- `ENABLE_AUTO_DEPLOY`: `true` (자동 배포 활성화)
+
+**Secrets:**
 - `DEPLOY_HOST`: 라즈베리파이 IP 주소
 - `DEPLOY_USER`: SSH 사용자명 (보통 `pi`)
 - `DEPLOY_SSH_KEY`: SSH 개인키 (private key)

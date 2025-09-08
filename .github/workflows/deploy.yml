@@ -69,7 +69,7 @@ jobs:
         fi
     
     - name: Deploy to Raspberry Pi
-      if: ${{ secrets.DEPLOY_HOST != '' }}
+      if: ${{ vars.ENABLE_AUTO_DEPLOY == 'true' }}
       uses: appleboy/ssh-action@v1.0.0
       with:
         host: ${{ secrets.DEPLOY_HOST }}
@@ -88,12 +88,18 @@ jobs:
         echo "✅ Frontend built successfully"
         echo "✅ Backend built successfully"
         echo "✅ Deployment files pushed to production branch"
-        if [ -n "${{ secrets.DEPLOY_HOST }}" ]; then
+        echo ""
+        if [ "${{ vars.ENABLE_AUTO_DEPLOY }}" == "true" ]; then
           echo "✅ Automatically deployed to Raspberry Pi"
         else
-          echo "⚠️  SSH secrets not configured - manual deployment required"
+          echo "⚠️  Auto-deploy not enabled - manual deployment required"
           echo ""
-          echo "🔧 To deploy on Raspberry Pi manually, run:"
+          echo "🔧 To enable auto-deploy:"
+          echo "1. Go to Settings > Secrets and variables > Actions"
+          echo "2. Add Variables: ENABLE_AUTO_DEPLOY = true"
+          echo "3. Add Secrets: DEPLOY_HOST, DEPLOY_USER, DEPLOY_SSH_KEY"
+          echo ""
+          echo "🔧 To deploy manually on Raspberry Pi, run:"
           echo "git fetch origin"
           echo "git checkout production"
           echo "git pull origin production"
