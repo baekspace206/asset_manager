@@ -147,10 +147,10 @@ const AdminDashboard: React.FC = () => {
             alignItems: 'center',
             gap: '8px'
           }}>
-            👑 Admin Dashboard test
+            👑 Admin baek test
           </h2>
           <p style={{ margin: '4px 0 0 0', color: '#6b7280', fontSize: '14px' }}>
-            Manage user registrations, permissions, and view system statistics
+            Manage user registrations, permissions, and view system statistics test
           </p>
         </div>
 
