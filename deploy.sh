@@ -13,7 +13,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-PROJECT_DIR="/home/pi/asset_manager"
+PROJECT_DIR="/home/baekjm/assetManager"
 FRONTEND_BUILD_DIR="$PROJECT_DIR/apps/frontend/build"
 PRODUCTION_DIR="/var/www/asset-manager"
 BACKUP_DIR="/var/backups/asset-manager"
@@ -36,9 +36,9 @@ log_warning() {
     echo -e "${YELLOW}[WARNING]${NC} $1"
 }
 
-# Check if running as correct user (pi)
-if [ "$USER" != "pi" ]; then
-    log_error "This script should be run as the 'pi' user"
+# Check if running as correct user (baekjm)
+if [ "$USER" != "baekjm" ]; then
+    log_error "This script should be run as the 'baekjm' user"
     exit 1
 fi
 
@@ -56,43 +56,20 @@ log "Starting Asset Manager deployment process..."
 cd "$PROJECT_DIR" || exit 1
 log "Changed to project directory: $PROJECT_DIR"
 
-# Step 2: Pull latest changes
-log "Pulling latest changes from GitHub..."
+# Step 2: Pull latest changes from production branch
+log "Pulling latest changes from GitHub production branch..."
 git fetch origin
-CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-git pull origin "$CURRENT_BRANCH"
-log_success "Successfully pulled latest changes"
+git checkout production 2>/dev/null || git checkout -b production origin/production
+git reset --hard origin/production
+log_success "Successfully pulled latest production build"
 
-# Step 3: Install backend dependencies (if package.json changed)
-log "Checking backend dependencies..."
-cd "$PROJECT_DIR/apps/backend"
-npm install --production
-log_success "Backend dependencies updated"
-
-# Step 4: Install frontend dependencies and build
-log "Building frontend application..."
-cd "$PROJECT_DIR/apps/frontend"
-
-# Check available memory and use swap if needed
-AVAILABLE_MEM=$(free -m | awk 'NR==2{printf "%d", $7}')
-if [ "$AVAILABLE_MEM" -lt 1000 ]; then
-    log_warning "Low memory detected ($AVAILABLE_MEM MB). Enabling swap..."
-    sudo swapon --show || sudo swapon /var/swap
-fi
-
-# Install frontend dependencies
-npm install
-
-# Build with memory optimization for Raspberry Pi
-log "Building frontend with memory optimization..."
-NODE_OPTIONS="--max-old-space-size=2048" npm run build
-
+# Step 3: Skip building - use pre-built files from GitHub Actions
+log "Using pre-built files from GitHub Actions..."
 if [ ! -d "$FRONTEND_BUILD_DIR" ]; then
-    log_error "Frontend build failed - build directory not found"
+    log_error "Frontend build directory not found - GitHub Actions build may have failed"
     exit 1
 fi
-
-log_success "Frontend build completed successfully"
+log_success "Frontend build files verified"
 
 # Step 5: Create backup of current production files
 log "Creating backup of current production files..."
@@ -116,7 +93,7 @@ log "Restarting backend service..."
 pm2 restart "$PM2_APP_NAME" || {
     log_warning "PM2 restart failed, trying to start..."
     cd "$PROJECT_DIR/apps/backend"
-    pm2 start npm --name "$PM2_APP_NAME" -- run start:prod
+    pm2 start dist/main.js --name "$PM2_APP_NAME"
 }
 
 # Wait for backend to start
