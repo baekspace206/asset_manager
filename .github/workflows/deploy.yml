@@ -69,7 +69,7 @@ jobs:
         fi
     
     - name: Deploy to Raspberry Pi
-      if: secrets.DEPLOY_HOST
+      if: ${{ secrets.DEPLOY_HOST != '' }}
       uses: appleboy/ssh-action@v1.0.0
       with:
         host: ${{ secrets.DEPLOY_HOST }}
