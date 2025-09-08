@@ -1,4 +1,4 @@
-name: Build and Deploy to Production
+name: Build and Deploy to Raspberry Pi
 
 on:
   push:
@@ -68,14 +68,34 @@ jobs:
           git push origin production --force
         fi
     
+    - name: Deploy to Raspberry Pi
+      if: ${{ secrets.DEPLOY_HOST }}
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.DEPLOY_HOST }}
+        username: ${{ secrets.DEPLOY_USER }}
+        key: ${{ secrets.DEPLOY_SSH_KEY }}
+        port: ${{ secrets.DEPLOY_PORT || 22 }}
+        script: |
+          cd /home/pi/asset_manager
+          git fetch origin
+          git checkout production
+          git pull origin production
+          ./deploy.sh
+    
     - name: Deployment Summary
       run: |
         echo "✅ Frontend built successfully"
         echo "✅ Backend built successfully"
         echo "✅ Deployment files pushed to production branch"
-        echo ""
-        echo "🔧 To deploy on Raspberry Pi, run:"
-        echo "git fetch origin"
-        echo "git checkout production"
-        echo "git pull origin production"
-        echo "./scripts/deploy-pi.sh"
+        if [ -n "${{ secrets.DEPLOY_HOST }}" ]; then
+          echo "✅ Automatically deployed to Raspberry Pi"
+        else
+          echo "⚠️  SSH secrets not configured - manual deployment required"
+          echo ""
+          echo "🔧 To deploy on Raspberry Pi manually, run:"
+          echo "git fetch origin"
+          echo "git checkout production"
+          echo "git pull origin production"
+          echo "./deploy.sh"
+        fi
