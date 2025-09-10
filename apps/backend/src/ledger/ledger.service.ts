@@ -42,14 +42,13 @@ export class LedgerService {
 
   async findAll(userId: number): Promise<LedgerEntry[]> {
     return this.ledgerRepository.find({
-      where: { userId },
       order: { date: 'DESC', createdAt: 'DESC' },
     });
   }
 
   async findOne(id: number, userId: number): Promise<LedgerEntry> {
     const entry = await this.ledgerRepository.findOne({
-      where: { id, userId },
+      where: { id },
     });
     if (!entry) {
       throw new NotFoundException('Ledger entry not found');
@@ -87,14 +86,7 @@ export class LedgerService {
   }
 
   async getMonthlyStats(userId: number, year?: number, month?: number): Promise<MonthlyStats[]> {
-    // Validate userId to prevent NaN errors
-    if (!userId || isNaN(Number(userId))) {
-      console.error('Invalid userId provided to getMonthlyStats:', userId);
-      return [];
-    }
-
     let entries: LedgerEntry[] = [];
-    const validUserId = Number(userId);
     
     try {
       if (year && month) {
@@ -102,7 +94,6 @@ export class LedgerService {
         const endDate = `${year}-${month.toString().padStart(2, '0')}-31`;
         entries = await this.ledgerRepository.find({
           where: { 
-            userId: validUserId,
             date: Between(startDate, endDate) as any
           },
           order: { date: 'DESC', createdAt: 'DESC' }
@@ -112,14 +103,12 @@ export class LedgerService {
         const endDate = `${year}-12-31`;
         entries = await this.ledgerRepository.find({
           where: { 
-            userId: validUserId,
             date: Between(startDate, endDate) as any
           },
           order: { date: 'DESC', createdAt: 'DESC' }
         });
       } else {
         entries = await this.ledgerRepository.find({
-          where: { userId: validUserId },
           order: { date: 'DESC', createdAt: 'DESC' }
         });
       }
@@ -170,7 +159,6 @@ export class LedgerService {
       const result = await this.ledgerRepository
         .createQueryBuilder('entry')
         .select('DISTINCT entry.category', 'category')
-        .where('entry.userId = :userId', { userId: Number(userId) })
         .getRawMany();
 
       return result.map(item => item.category).sort();
@@ -206,7 +194,6 @@ export class LedgerService {
   async getLogs(userId: number, limit: number = 50): Promise<LedgerLog[]> {
     try {
       return await this.ledgerLogRepository.find({
-        where: { userId },
         order: { createdAt: 'DESC' },
         take: limit
       });

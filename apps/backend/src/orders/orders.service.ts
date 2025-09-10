@@ -26,21 +26,21 @@ export class OrdersService {
 
   async findAllPending(userId: number): Promise<Order[]> {
     return this.ordersRepository.find({
-      where: { userId, status: OrderStatus.PENDING },
+      where: { status: OrderStatus.PENDING },
       order: { createdAt: 'DESC' },
     });
   }
 
   async findAllCompleted(userId: number): Promise<Order[]> {
     return this.ordersRepository.find({
-      where: { userId, status: OrderStatus.COMPLETED },
+      where: { status: OrderStatus.COMPLETED },
       order: { completedAt: 'DESC' },
     });
   }
 
   async findOne(id: number, userId: number): Promise<Order> {
     const order = await this.ordersRepository.findOne({
-      where: { id, userId },
+      where: { id },
     });
     if (!order) {
       throw new NotFoundException('Order not found');

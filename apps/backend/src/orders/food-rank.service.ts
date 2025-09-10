@@ -24,14 +24,13 @@ export class FoodRankService {
 
   async findAll(userId: number): Promise<FoodRank[]> {
     return this.foodRankRepository.find({
-      where: { userId },
       order: { date: 'DESC' },
     });
   }
 
   async findOne(id: number, userId: number): Promise<FoodRank> {
     const foodRank = await this.foodRankRepository.findOne({
-      where: { id, userId },
+      where: { id },
     });
     if (!foodRank) {
       throw new NotFoundException('Food rank not found');
