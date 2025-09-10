@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Header from './components/Header';
 import Login from './components/Login';
@@ -12,7 +12,13 @@ import './App.css';
 
 function AppContent() {
   const { user, loading, isAdmin } = useAuth();
-  const [currentView, setCurrentView] = useState<'assets' | 'ledger' | 'orders' | 'diary' | 'admin'>('assets');
+  const [currentView, setCurrentView] = useState<'assets' | 'ledger' | 'orders' | 'diary' | 'admin'>(() => {
+    return (localStorage.getItem('currentView') as 'assets' | 'ledger' | 'orders' | 'diary' | 'admin') || 'assets';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('currentView', currentView);
+  }, [currentView]);
 
   if (loading) {
     return (
