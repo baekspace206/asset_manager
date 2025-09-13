@@ -2,7 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Order, OrderStatus } from './entities/order.entity';
-import { FoodRank } from './entities/food-rank.entity';
+import { FoodItem } from './entities/food-item.entity';
+import { FoodRating } from './entities/food-rating.entity';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto, CompleteOrderDto } from './dto/update-order.dto';
 
@@ -11,8 +12,10 @@ export class OrdersService {
   constructor(
     @InjectRepository(Order)
     private ordersRepository: Repository<Order>,
-    @InjectRepository(FoodRank)
-    private foodRankRepository: Repository<FoodRank>,
+    @InjectRepository(FoodItem)
+    private foodItemRepository: Repository<FoodItem>,
+    @InjectRepository(FoodRating)
+    private foodRatingRepository: Repository<FoodRating>,
   ) {}
 
   async create(createOrderDto: CreateOrderDto, userId: number): Promise<Order> {
@@ -69,19 +72,42 @@ export class OrdersService {
 
     const completedOrder = await this.ordersRepository.save(order);
 
-    // Create food rank entry
-    const foodRank = this.foodRankRepository.create({
-      orderId: order.id,
-      userId,
-      foodType: order.foodType,
-      restaurantName: completeOrderDto.restaurantName,
-      foodImage: completeOrderDto.foodImage,
-      rating: completeOrderDto.rating,
-      date: new Date(order.date),
-      comment: completeOrderDto.rankComment || null,
+    // Create food item (if not exists) and rating
+    let foodItem = await this.foodItemRepository.findOne({
+      where: { 
+        orderId: order.id 
+      }
     });
 
-    await this.foodRankRepository.save(foodRank);
+    if (!foodItem) {
+      // Create new food item
+      foodItem = this.foodItemRepository.create({
+        orderId: order.id,
+        foodType: order.foodType,
+        restaurantName: completeOrderDto.restaurantName,
+        foodImage: completeOrderDto.foodImage,
+        date: new Date(order.date),
+        description: order.details,
+        createdBy: userId,
+      });
+      foodItem = await this.foodItemRepository.save(foodItem);
+    }
+
+    // Create rating for this user
+    const existingRating = await this.foodRatingRepository.findOne({
+      where: { foodItemId: foodItem.id, userId }
+    });
+
+    if (!existingRating) {
+      const rating = this.foodRatingRepository.create({
+        foodItemId: foodItem.id,
+        userId,
+        rating: completeOrderDto.rating,
+        comment: completeOrderDto.rankComment || null,
+      });
+      await this.foodRatingRepository.save(rating);
+    }
+
 
     return completedOrder;
   }

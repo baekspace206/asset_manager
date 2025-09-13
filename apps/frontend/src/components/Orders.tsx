@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { orderAPI, Order, CreateOrderDto, CompleteOrderDto } from '../services/api';
-import FoodRank from './FoodRank';
+import FoodItemRanking from './FoodItemRanking';
 
 
 const Orders: React.FC = () => {
@@ -58,6 +58,10 @@ const Orders: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleEditOrder = (order: Order) => {
+    setEditingOrder(order);
   };
 
   const handleUpdateOrder = async (e: React.FormEvent) => {
@@ -323,7 +327,7 @@ const Orders: React.FC = () => {
                     </div>
                     <div style={{ display: 'flex', gap: '8px', marginLeft: '15px' }}>
                       <button
-                        onClick={() => setEditingOrder(order)}
+                        onClick={() => handleEditOrder(order)}
                         style={{
                           padding: '6px 12px',
                           backgroundColor: '#ffc107',
@@ -425,6 +429,36 @@ const Orders: React.FC = () => {
                         {order.completedAt && <span>Completed: {formatDate(order.completedAt)}</span>}
                       </div>
                     </div>
+                    <div style={{ display: 'flex', gap: '10px', flexDirection: 'column', minWidth: '80px' }}>
+                      <button
+                        onClick={() => handleEditOrder(order)}
+                        style={{
+                          padding: '6px 12px',
+                          backgroundColor: '#ffc107',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                          fontSize: '14px'
+                        }}
+                      >
+                        ✏️ Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteOrder(order.id)}
+                        style={{
+                          padding: '6px 12px',
+                          backgroundColor: '#dc3545',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                          fontSize: '14px'
+                        }}
+                      >
+                        🗑️ Delete
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -435,7 +469,7 @@ const Orders: React.FC = () => {
 
       {/* Food Rankings Tab */}
       {activeTab === 'rankings' && (
-        <FoodRank />
+        <FoodItemRanking />
       )}
 
       {/* Edit Modal */}

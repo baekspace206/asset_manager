@@ -318,6 +318,83 @@ export const foodRankAPI = {
     api.delete(`/food-ranks/${id}`).then(res => res.data),
 };
 
+// New Food Item system
+export interface FoodRating {
+  id: number;
+  foodItemId: number;
+  userId: number;
+  rating: number;
+  comment?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface FoodItemWithRatings {
+  id: number;
+  orderId?: number;
+  foodType: string;
+  restaurantName: string;
+  foodImage: string;
+  date: string;
+  description?: string;
+  createdBy: number;
+  baekRating?: FoodRating;
+  jeongRating?: FoodRating;
+  averageRating?: number;
+  ratingCount: number;
+  isCompleted: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateFoodItemDto {
+  orderId?: number;
+  foodType: string;
+  restaurantName: string;
+  foodImage: string;
+  date: string;
+  description?: string;
+}
+
+export interface CreateFoodRatingDto {
+  foodItemId: number;
+  rating: number;
+  comment?: string;
+}
+
+export interface UpdateFoodRatingDto {
+  rating?: number;
+  comment?: string;
+}
+
+export const foodItemAPI = {
+  getAll: (filter?: string, sort?: string): Promise<FoodItemWithRatings[]> => {
+    const params = new URLSearchParams();
+    if (filter) params.append('filter', filter);
+    if (sort) params.append('sort', sort);
+    const queryString = params.toString();
+    return api.get(`/food-items${queryString ? '?' + queryString : ''}`).then(res => res.data);
+  },
+  
+  getOne: (id: number): Promise<FoodItemWithRatings> =>
+    api.get(`/food-items/${id}`).then(res => res.data),
+  
+  create: (data: CreateFoodItemDto): Promise<FoodItemWithRatings> =>
+    api.post('/food-items', data).then(res => res.data),
+  
+  addRating: (id: number, data: CreateFoodRatingDto): Promise<FoodRating> =>
+    api.post(`/food-items/${id}/ratings`, data).then(res => res.data),
+  
+  updateRating: (id: number, data: UpdateFoodRatingDto): Promise<FoodRating> =>
+    api.patch(`/food-items/${id}/ratings`, data).then(res => res.data),
+  
+  deleteRating: (id: number): Promise<{ success: boolean }> =>
+    api.delete(`/food-items/${id}/ratings`).then(res => res.data),
+  
+  delete: (id: number): Promise<{ success: boolean }> =>
+    api.delete(`/food-items/${id}`).then(res => res.data),
+};
+
 export interface Diary {
   id: number;
   userId: number;
