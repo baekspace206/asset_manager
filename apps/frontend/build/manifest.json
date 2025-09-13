@@ -1,0 +1,9 @@
+{
+  "short_name": "Tori Fam Hub",
+  "name": "Tori Fam Hub - Family Finance and Life Management",
+  "icons": [],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#1f2937",
+  "background_color": "#ffffff"
+}
