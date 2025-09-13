@@ -4,9 +4,10 @@ import PortfolioChart from './PortfolioChart';
 
 interface AssetSummaryProps {
   assets: Asset[];
+  onCategoryClick?: (category: string) => void;
 }
 
-const AssetSummary: React.FC<AssetSummaryProps> = ({ assets }) => {
+const AssetSummary: React.FC<AssetSummaryProps> = ({ assets, onCategoryClick }) => {
   const totalValue = assets.reduce((sum, asset) => sum + asset.amount, 0);
   
   const categoryStats = React.useMemo(() => {
@@ -104,19 +105,40 @@ const AssetSummary: React.FC<AssetSummaryProps> = ({ assets }) => {
             alignItems: 'center',
             gap: '8px'
           }}>
-            📊 Category Breakdown
+            📊 Category
           </h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth <= 768 ? '1fr' : 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px' }}>
             {categoryStats.map((stat) => {
               const percentage = totalValue > 0 ? (stat.total / totalValue) * 100 : 0;
               return (
                 <div
                   key={stat.category}
+                  onClick={() => onCategoryClick?.(stat.category)}
                   style={{
                     padding: '16px',
                     borderRadius: '8px',
                     border: `2px solid ${getCategoryColor(stat.category)}20`,
-                    backgroundColor: `${getCategoryColor(stat.category)}05`
+                    backgroundColor: `${getCategoryColor(stat.category)}05`,
+                    cursor: onCategoryClick ? 'pointer' : 'default',
+                    transition: 'all 0.2s ease',
+                    ...(onCategoryClick && {
+                      ':hover': {
+                        transform: 'translateY(-2px)',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                      }
+                    })
+                  }}
+                  onMouseEnter={(e) => {
+                    if (onCategoryClick) {
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (onCategoryClick) {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }
                   }}
                 >
                   <div style={{ 

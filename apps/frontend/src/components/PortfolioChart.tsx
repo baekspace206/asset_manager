@@ -6,15 +6,68 @@ const PortfolioChart: React.FC = () => {
   const [growthData, setGrowthData] = useState<PortfolioGrowthData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
+  const [dateRange, setDateRange] = useState<'7d' | '1m' | '3m' | '6m' | '1y' | 'all' | 'custom'>('1m');
 
   useEffect(() => {
     fetchGrowthData();
   }, []);
 
+  useEffect(() => {
+    if (dateRange !== 'custom') {
+      applyDateRange();
+    }
+  }, [dateRange]);
+
+  useEffect(() => {
+    fetchGrowthData();
+  }, [startDate, endDate]);
+
+  const applyDateRange = () => {
+    const now = new Date();
+    const today = now.toISOString().split('T')[0];
+    
+    switch (dateRange) {
+      case '7d':
+        const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        setStartDate(weekAgo.toISOString().split('T')[0]);
+        setEndDate(today);
+        break;
+      case '1m':
+        const monthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+        setStartDate(monthAgo.toISOString().split('T')[0]);
+        setEndDate(today);
+        break;
+      case '3m':
+        const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 3, now.getDate());
+        setStartDate(threeMonthsAgo.toISOString().split('T')[0]);
+        setEndDate(today);
+        break;
+      case '6m':
+        const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 6, now.getDate());
+        setStartDate(sixMonthsAgo.toISOString().split('T')[0]);
+        setEndDate(today);
+        break;
+      case '1y':
+        const yearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+        setStartDate(yearAgo.toISOString().split('T')[0]);
+        setEndDate(today);
+        break;
+      case 'all':
+        setStartDate('');
+        setEndDate('');
+        break;
+    }
+  };
+
   const fetchGrowthData = async () => {
     try {
       setError(null);
-      const data = await portfolioAPI.getGrowthData();
+      const data = await portfolioAPI.getGrowthData(
+        startDate || undefined, 
+        endDate || undefined
+      );
       setGrowthData(data);
     } catch (error) {
       console.error('Error fetching portfolio growth data:', error);
@@ -116,9 +169,33 @@ const PortfolioChart: React.FC = () => {
       <div style={{ 
         display: 'flex', 
         justifyContent: 'space-between', 
-        alignItems: 'center',
-        marginBottom: '20px'
+        alignItems: 'flex-start',
+        marginBottom: '20px',
+        flexWrap: 'wrap',
+        gap: '16px'
       }}>
+        {/* Mobile breakpoint detection */}
+        <style>{`
+          @media (max-width: 768px) {
+            .portfolio-header {
+              flex-direction: column;
+              align-items: stretch !important;
+            }
+            .portfolio-controls {
+              justify-content: center !important;
+            }
+            .date-range-buttons {
+              justify-content: center !important;
+            }
+            .custom-date-inputs {
+              flex-direction: column !important;
+              width: 100% !important;
+            }
+            .custom-date-inputs input {
+              width: 100% !important;
+            }
+          }
+        `}</style>
         <h3 style={{
           margin: '0',
           color: '#1f2937',
@@ -130,34 +207,89 @@ const PortfolioChart: React.FC = () => {
         }}>
           📈 Portfolio Growth
         </h3>
-        <button
-          onClick={fetchGrowthData}
-          style={{
-            padding: '8px 16px',
-            backgroundColor: '#f3f4f6',
-            color: '#374151',
-            border: '1px solid #e5e7eb',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontSize: '12px',
-            fontWeight: '500',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            transition: 'all 0.2s'
-          }}
-          onMouseOver={(e) => {
-            e.currentTarget.style.backgroundColor = '#e5e7eb';
-          }}
-          onMouseOut={(e) => {
-            e.currentTarget.style.backgroundColor = '#f3f4f6';
-          }}
-        >
-          🔄 Refresh
-        </button>
+        
+        <div className="portfolio-controls" style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+          {/* Date Range Buttons */}
+          <div className="date-range-buttons" style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+            {['7d', '1m', '3m', '6m', '1y', 'all', 'custom'].map((range) => (
+              <button
+                key={range}
+                onClick={() => setDateRange(range as typeof dateRange)}
+                style={{
+                  padding: '6px 12px',
+                  backgroundColor: dateRange === range ? '#059669' : '#f3f4f6',
+                  color: dateRange === range ? 'white' : '#374151',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '11px',
+                  fontWeight: '500',
+                  transition: 'all 0.2s'
+                }}
+              >
+                {range === 'all' ? 'All' : range.toUpperCase()}
+              </button>
+            ))}
+          </div>
+          
+          {/* Custom Date Inputs */}
+          {dateRange === 'custom' && (
+            <div className="custom-date-inputs" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                style={{
+                  padding: '4px 8px',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '4px',
+                  fontSize: '12px'
+                }}
+              />
+              <span style={{ fontSize: '12px', color: '#6b7280' }}>~</span>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                style={{
+                  padding: '4px 8px',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '4px',
+                  fontSize: '12px'
+                }}
+              />
+            </div>
+          )}
+          
+          <button
+            onClick={fetchGrowthData}
+            style={{
+              padding: '6px 12px',
+              backgroundColor: '#f3f4f6',
+              color: '#374151',
+              border: '1px solid #e5e7eb',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '11px',
+              fontWeight: '500',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              transition: 'all 0.2s'
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.backgroundColor = '#e5e7eb';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.backgroundColor = '#f3f4f6';
+            }}
+          >
+            🔄 Refresh
+          </button>
+        </div>
       </div>
       
-      <div style={{ width: '100%', height: '300px' }}>
+      <div style={{ width: '100%', height: window.innerWidth <= 768 ? '250px' : '300px' }}>
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={growthData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />

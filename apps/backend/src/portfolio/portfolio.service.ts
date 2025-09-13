@@ -30,11 +30,46 @@ export class PortfolioService {
     });
   }
 
-  async getGrowthData(): Promise<{ date: string; value: number }[]> {
-    const snapshots = await this.getSnapshots();
-    return snapshots.map(snapshot => ({
-      date: snapshot.date.toISOString().split('T')[0],
-      value: parseFloat(snapshot.totalValue.toString())
-    }));
+  async getGrowthData(startDate?: string, endDate?: string): Promise<{ date: string; value: number }[]> {
+    let snapshots = await this.getSnapshots();
+    
+    // Filter by date range if provided
+    if (startDate) {
+      snapshots = snapshots.filter(snapshot => 
+        snapshot.date >= new Date(startDate)
+      );
+    }
+    if (endDate) {
+      snapshots = snapshots.filter(snapshot => 
+        snapshot.date <= new Date(endDate + 'T23:59:59.999Z')
+      );
+    }
+    
+    // Group by date (YYYY-MM-DD) and aggregate values
+    const dailyData = new Map<string, { value: number; timestamp: Date }[]>();
+    
+    snapshots.forEach(snapshot => {
+      const dateKey = snapshot.date.toISOString().split('T')[0];
+      const value = parseFloat(snapshot.totalValue.toString());
+      
+      if (!dailyData.has(dateKey)) {
+        dailyData.set(dateKey, []);
+      }
+      dailyData.get(dateKey)!.push({ value, timestamp: snapshot.date });
+    });
+    
+    // Convert to array and use the latest (chronologically last) value for each day
+    const result = Array.from(dailyData.entries())
+      .map(([date, entries]) => {
+        // Sort by timestamp to get the chronologically latest entry
+        const sortedEntries = entries.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+        return {
+          date,
+          value: sortedEntries[0].value // Take the chronologically latest value
+        };
+      })
+      .sort((a, b) => a.date.localeCompare(b.date));
+    
+    return result;
   }
 }

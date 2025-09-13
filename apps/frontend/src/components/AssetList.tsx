@@ -14,6 +14,7 @@ const AssetList: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingAsset, setEditingAsset] = useState<Asset | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     category: '',
@@ -36,9 +37,18 @@ const AssetList: React.FC = () => {
     }
   };
 
+  // Filter assets by selected category
+  const filteredAssets = React.useMemo(() => {
+    if (!selectedCategory) return assets;
+    return assets.filter(asset => {
+      const category = asset.category || 'Uncategorized';
+      return category === selectedCategory;
+    });
+  }, [assets, selectedCategory]);
+
   // Group and sort assets by category
   const groupedAssets = React.useMemo(() => {
-    const sorted = [...assets].sort((a, b) => {
+    const sorted = [...filteredAssets].sort((a, b) => {
       const catA = a.category || 'Uncategorized';
       const catB = b.category || 'Uncategorized';
       if (catA === catB) {
@@ -86,7 +96,15 @@ const AssetList: React.FC = () => {
     }
 
     return grouped;
-  }, [assets]);
+  }, [filteredAssets]);
+
+  const handleCategoryClick = (category: string) => {
+    setSelectedCategory(category);
+  };
+
+  const clearCategoryFilter = () => {
+    setSelectedCategory(null);
+  };
 
   const getCategoryIcon = (category: string | undefined) => {
     const cat = category?.toLowerCase() || 'uncategorized';
@@ -166,16 +184,51 @@ const AssetList: React.FC = () => {
   if (loading) return <div>Loading...</div>;
 
   return (
-    <div style={{ padding: '20px', backgroundColor: '#f8fafc', minHeight: '100vh' }}>
+    <div style={{ padding: window.innerWidth <= 768 ? '10px' : '20px', backgroundColor: '#f8fafc', minHeight: '100vh' }}>
+      {/* Mobile-specific styles */}
+      <style>{`
+        @media (max-width: 768px) {
+          .asset-table th, .asset-table td {
+            font-size: 12px !important;
+            padding: 8px !important;
+          }
+          .asset-table .category-cell {
+            min-width: 120px !important;
+          }
+          .asset-table .name-cell {
+            min-width: 140px !important;
+          }
+          .asset-table .amount-cell {
+            min-width: 100px !important;
+          }
+          .asset-table .note-cell {
+            min-width: 120px !important;
+          }
+          .asset-table .actions-cell {
+            min-width: 100px !important;
+          }
+          .modal-form-grid {
+            grid-template-columns: 1fr !important;
+          }
+          .action-buttons {
+            flex-direction: column !important;
+          }
+          .action-buttons button {
+            width: 100% !important;
+          }
+        }
+      `}</style>
       <div style={{ 
         display: 'flex', 
         justifyContent: 'space-between', 
-        alignItems: 'center', 
+        alignItems: window.innerWidth <= 768 ? 'flex-start' : 'center', 
         marginBottom: '30px',
         backgroundColor: 'white',
-        padding: '20px',
+        padding: window.innerWidth <= 768 ? '16px' : '20px',
         borderRadius: '12px',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+        flexDirection: window.innerWidth <= 768 ? 'column' : 'row',
+        gap: window.innerWidth <= 768 ? '16px' : '0'
       }}>
         <div>
           <h2 style={{ margin: 0, color: '#1f2937', fontSize: '28px', fontWeight: '700' }}>
@@ -215,7 +268,62 @@ const AssetList: React.FC = () => {
         </button>
       </div>
 
-      <AssetSummary assets={assets} />
+      <AssetSummary assets={assets} onCategoryClick={handleCategoryClick} />
+      
+      {/* Category Filter Status */}
+      {selectedCategory && (
+        <div style={{
+          backgroundColor: 'white',
+          padding: '16px',
+          borderRadius: '8px',
+          marginBottom: '20px',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+          border: '1px solid #e5e7eb',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ color: '#6b7280', fontSize: '14px' }}>
+              Showing assets in category:
+            </span>
+            <span style={{ 
+              color: getCategoryColor(selectedCategory),
+              fontWeight: '600',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px'
+            }}>
+              {getCategoryIcon(selectedCategory)} {selectedCategory}
+            </span>
+          </div>
+          <button
+            onClick={clearCategoryFilter}
+            style={{
+              padding: '6px 12px',
+              backgroundColor: '#f3f4f6',
+              color: '#374151',
+              border: '1px solid #d1d5db',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '12px',
+              fontWeight: '500',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              transition: 'all 0.2s'
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.backgroundColor = '#e5e7eb';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.backgroundColor = '#f3f4f6';
+            }}
+          >
+            ✕ Clear Filter
+          </button>
+        </div>
+      )}
 
       <Modal
         isOpen={showForm}
@@ -223,7 +331,7 @@ const AssetList: React.FC = () => {
         title={editingAsset ? '✏️ Edit Financial Asset' : '➕ Add New Financial Asset'}
       >
         <form onSubmit={handleSubmit}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px' }}>
+          <div className="modal-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px' }}>
             <div>
               <label style={{ color: '#374151', fontWeight: '500', fontSize: '14px' }}>
                 Name:
@@ -321,7 +429,7 @@ const AssetList: React.FC = () => {
               </label>
             </div>
           </div>
-          <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+          <div className="action-buttons" style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
             <button
               type="button"
               onClick={resetForm}
@@ -390,12 +498,13 @@ const AssetList: React.FC = () => {
           overflowX: 'auto', 
           WebkitOverflowScrolling: 'touch',
           scrollbarWidth: 'thin',
-          scrollbarColor: '#d1d5db #f3f4f6'
+          scrollbarColor: '#d1d5db #f3f4f6',
+          maxWidth: '100%'
         }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '600px' }}>
+          <table className="asset-table" style={{ width: '100%', borderCollapse: 'collapse', minWidth: '600px' }}>
           <thead>
             <tr style={{ backgroundColor: '#f8fafc' }}>
-              <th style={{ 
+              <th className="category-cell" style={{ 
                 padding: '16px', 
                 textAlign: 'center', 
                 fontWeight: '600', 
@@ -405,7 +514,7 @@ const AssetList: React.FC = () => {
               }}>
                 Category
               </th>
-              <th style={{ 
+              <th className="name-cell" style={{ 
                 padding: '16px', 
                 textAlign: 'center', 
                 fontWeight: '600', 
@@ -415,7 +524,7 @@ const AssetList: React.FC = () => {
               }}>
                 Name
               </th>
-              <th style={{ 
+              <th className="amount-cell" style={{ 
                 padding: '16px', 
                 textAlign: 'center', 
                 fontWeight: '600', 
@@ -425,7 +534,7 @@ const AssetList: React.FC = () => {
               }}>
                 Amount
               </th>
-              <th style={{ 
+              <th className="note-cell" style={{ 
                 padding: '16px', 
                 textAlign: 'center', 
                 fontWeight: '600', 
@@ -435,7 +544,7 @@ const AssetList: React.FC = () => {
               }}>
                 Note
               </th>
-              <th style={{ 
+              <th className="actions-cell" style={{ 
                 padding: '16px', 
                 textAlign: 'center', 
                 fontWeight: '600', 
@@ -454,7 +563,7 @@ const AssetList: React.FC = () => {
                 transition: 'background-color 0.2s'
               }}>
                 {asset.isFirstInCategory ? (
-                  <td style={{ 
+                  <td className="category-cell" style={{ 
                     padding: '16px',
                     verticalAlign: 'middle',
                     borderRight: '1px solid #f3f4f6',
@@ -478,7 +587,7 @@ const AssetList: React.FC = () => {
                     </div>
                   </td>
                 ) : null}
-                <td style={{ 
+                <td className="name-cell" style={{ 
                   padding: '16px',
                   textAlign: 'center',
                   color: '#1f2937',
@@ -487,7 +596,7 @@ const AssetList: React.FC = () => {
                 }}>
                   {asset.name}
                 </td>
-                <td style={{ 
+                <td className="amount-cell" style={{ 
                   padding: '16px', 
                   textAlign: 'center',
                   color: '#059669',
@@ -496,7 +605,7 @@ const AssetList: React.FC = () => {
                 }}>
                   ₩{asset.amount.toLocaleString()}
                 </td>
-                <td style={{ 
+                <td className="note-cell" style={{ 
                   padding: '16px',
                   textAlign: 'center',
                   color: '#6b7280',
@@ -506,7 +615,7 @@ const AssetList: React.FC = () => {
                 }}>
                   {asset.note || '-'}
                 </td>
-                <td style={{ 
+                <td className="actions-cell" style={{ 
                   padding: '16px',
                   textAlign: 'center'
                 }}>

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, UseGuards, Request, ForbiddenException } from '@nestjs/common';
+import { Controller, Get, Post, UseGuards, Request, ForbiddenException, Query } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { PortfolioService } from './portfolio.service';
 import { UsersService } from '../users/users.service';
@@ -21,7 +21,10 @@ export class PortfolioController {
   }
 
   @Get('growth')
-  async getGrowthData() {
-    return this.portfolioService.getGrowthData();
+  async getGrowthData(
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string
+  ) {
+    return this.portfolioService.getGrowthData(startDate, endDate);
   }
 }

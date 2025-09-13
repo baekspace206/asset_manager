@@ -67,11 +67,6 @@ export interface Asset {
   note?: string;
 }
 
-export interface PortfolioGrowthData {
-  date: string;
-  value: number;
-}
-
 export interface AuditLog {
   id: number;
   action: string;
@@ -142,13 +137,6 @@ export const assetAPI = {
     api.delete(`/assets/${id}`).then(res => res.data),
 };
 
-export const portfolioAPI = {
-  getGrowthData: (): Promise<PortfolioGrowthData[]> =>
-    api.get('/portfolio/growth').then(res => res.data),
-  
-  createSnapshot: (): Promise<any> =>
-    api.post('/portfolio/snapshot').then(res => res.data),
-};
 
 export const auditAPI = {
   getLogs: (): Promise<AuditLog[]> =>
@@ -429,6 +417,25 @@ export const diaryAPI = {
   
   delete: (id: number): Promise<{ success: boolean }> =>
     api.delete(`/diary/${id}`).then(res => res.data),
+};
+
+// Portfolio interfaces
+export interface PortfolioGrowthData {
+  date: string;
+  value: number;
+}
+
+export const portfolioAPI = {
+  getGrowthData: (startDate?: string, endDate?: string): Promise<PortfolioGrowthData[]> => {
+    const params = new URLSearchParams();
+    if (startDate) params.append('startDate', startDate);
+    if (endDate) params.append('endDate', endDate);
+    const queryString = params.toString();
+    return api.get(`/portfolio/growth${queryString ? '?' + queryString : ''}`).then(res => res.data);
+  },
+  
+  createSnapshot: (): Promise<any> =>
+    api.post('/portfolio/snapshot').then(res => res.data),
 };
 
 export default api;
