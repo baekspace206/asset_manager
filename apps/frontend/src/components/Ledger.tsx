@@ -92,6 +92,22 @@ const Ledger: React.FC = () => {
     });
   };
 
+
+  const scrollToCategoryDetails = (monthKey: string, category: string) => {
+    // First expand the month if not expanded
+    if (!expandedMonths.has(monthKey)) {
+      setExpandedMonths(prev => new Set(prev).add(monthKey));
+    }
+    
+    // Scroll to the category details after a short delay to allow expansion
+    setTimeout(() => {
+      const categoryElement = document.getElementById(`category-${monthKey}-${category}`);
+      if (categoryElement) {
+        categoryElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
+  };
+
   const formatCurrency = (amount: number) => {
     return `₩${new Intl.NumberFormat('ko-KR').format(amount)}`;
   };
@@ -117,6 +133,16 @@ const Ledger: React.FC = () => {
     return months;
   };
 
+  const getAllEntriesFlat = () => {
+    const allEntries: LedgerEntry[] = [];
+    monthlyStats.forEach(monthData => {
+      Object.values(monthData.categories).forEach(categoryData => {
+        allEntries.push(...categoryData.entries);
+      });
+    });
+    return allEntries;
+  };
+
   const getSortedEntries = (entries: LedgerEntry[]) => {
     switch (sortBy) {
       case 'latest':
@@ -130,6 +156,11 @@ const Ledger: React.FC = () => {
       default:
         return entries;
     }
+  };
+
+  const getFlatSortedEntries = () => {
+    const allEntries = getAllEntriesFlat();
+    return getSortedEntries(allEntries);
   };
 
   const getActionIcon = (action: LedgerLogAction) => {
@@ -148,6 +179,114 @@ const Ledger: React.FC = () => {
       case LedgerLogAction.DELETE: return '#dc3545';
       default: return '#6c757d';
     }
+  };
+
+  const renderFlatEntries = () => {
+    const sortedEntries = getFlatSortedEntries();
+    
+    if (sortedEntries.length === 0) {
+      return (
+        <div style={{ textAlign: 'center', color: '#666', fontSize: '18px', marginTop: '50px' }}>
+          No ledger entries found.
+        </div>
+      );
+    }
+
+    return (
+      <div style={{
+        backgroundColor: 'white',
+        borderRadius: '8px',
+        border: '1px solid #ddd',
+        overflow: 'hidden'
+      }}>
+        <div style={{
+          backgroundColor: '#f8f9fa',
+          padding: '20px',
+          borderBottom: '1px solid #dee2e6'
+        }}>
+          <h3 style={{ margin: 0, color: '#495057' }}>
+            📋 All Entries ({sortedEntries.length} items)
+          </h3>
+        </div>
+        <div style={{ padding: '0' }}>
+          {sortedEntries.map((entry, index) => (
+            <div key={entry.id} style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: '15px 20px',
+              borderBottom: index === sortedEntries.length - 1 ? 'none' : '1px solid #eee',
+              backgroundColor: index % 2 === 0 ? '#fff' : '#f9f9f9'
+            }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '5px' }}>
+                  <span style={{
+                    backgroundColor: '#e9ecef',
+                    padding: '2px 8px',
+                    borderRadius: '12px',
+                    fontSize: '12px',
+                    fontWeight: '500'
+                  }}>
+                    {entry.category}
+                  </span>
+                  <span style={{ fontSize: '14px', color: '#666' }}>
+                    {formatDate(entry.date)}
+                  </span>
+                </div>
+                <div style={{ fontWeight: 'bold', marginBottom: '5px' }}>
+                  {entry.description}
+                </div>
+                {entry.note && (
+                  <div style={{ fontSize: '12px', color: '#666' }}>
+                    📝 {entry.note}
+                  </div>
+                )}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <strong style={{ fontSize: '16px', color: '#007bff' }}>
+                  {formatCurrency(entry.amount)}
+                </strong>
+                {hasEditPermission && (
+                  <div style={{ display: 'flex', gap: '5px' }}>
+                    <button
+                      onClick={() => {
+                        setEditingEntry(entry);
+                        setIsModalOpen(true);
+                      }}
+                      style={{
+                        padding: '5px 10px',
+                        backgroundColor: '#ffc107',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '3px',
+                        cursor: 'pointer',
+                        fontSize: '12px'
+                      }}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDeleteEntry(entry.id)}
+                      style={{
+                        padding: '5px 10px',
+                        backgroundColor: '#dc3545',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '3px',
+                        cursor: 'pointer',
+                        fontSize: '12px'
+                      }}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   };
 
   const renderLogsTable = () => (
@@ -359,7 +498,7 @@ const Ledger: React.FC = () => {
         <div style={{ textAlign: 'center', color: '#666', fontSize: '18px', marginTop: '50px' }}>
           No ledger entries found.
         </div>
-      ) : (
+      ) : sortBy === 'category' ? (
         <div>
           {monthlyStats.map(monthData => (
             <div key={monthData.month} style={{
@@ -424,15 +563,30 @@ const Ledger: React.FC = () => {
                           const color = colors[index % colors.length];
                           
                           return (
-                            <div key={`summary-${category}`} className="category-card" style={{
-                              backgroundColor: 'white',
-                              padding: '12px',
-                              borderRadius: '6px',
-                              border: `2px solid ${color}20`,
-                              minWidth: '200px',
-                              flex: '1',
-                              boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                            }}>
+                            <div 
+                              key={`summary-${category}`} 
+                              className="category-card" 
+                              onClick={() => scrollToCategoryDetails(monthData.month, category)}
+                              style={{
+                                backgroundColor: 'white',
+                                padding: '12px',
+                                borderRadius: '6px',
+                                border: `2px solid ${color}20`,
+                                minWidth: '200px',
+                                flex: '1',
+                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                                cursor: 'pointer',
+                                transition: 'transform 0.2s, boxShadow 0.2s'
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.transform = 'translateY(-2px)';
+                                e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.15)';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.transform = 'translateY(0)';
+                                e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+                              }}
+                            >
                               <div style={{ fontWeight: 'bold', color: '#495057', marginBottom: '5px' }}>
                                 {category}
                               </div>
@@ -466,7 +620,7 @@ const Ledger: React.FC = () => {
                   {/* 카테고리별 상세 내역 */}
                   <h4 style={{ marginBottom: '20px', color: '#495057' }}>📋 Detailed Entries</h4>
                   {Object.entries(monthData.categories).map(([category, categoryData]) => (
-                    <div key={category} style={{ marginBottom: '30px' }}>
+                    <div key={category} id={`category-${monthData.month}-${category}`} style={{ marginBottom: '30px' }}>
                       <h5 style={{
                         backgroundColor: '#e9ecef',
                         padding: '10px',
@@ -551,6 +705,8 @@ const Ledger: React.FC = () => {
             </div>
           ))}
         </div>
+      ) : (
+        renderFlatEntries()
       )}
 
       {renderLogsTable()}
