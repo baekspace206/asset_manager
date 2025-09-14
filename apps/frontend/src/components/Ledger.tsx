@@ -11,7 +11,9 @@ const Ledger: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState<LedgerEntry | null>(null);
-  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
+  const [selectedYear, setSelectedYear] = useState<number | null>(new Date().getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
+  const [sortBy, setSortBy] = useState<'latest' | 'category' | 'amount_desc' | 'amount_asc'>('latest');
   const [expandedMonths, setExpandedMonths] = useState<Set<string>>(new Set());
   const [showLogs, setShowLogs] = useState(false);
 
@@ -21,7 +23,7 @@ const Ledger: React.FC = () => {
     try {
       setLoading(true);
       const [statsData, categoriesData] = await Promise.all([
-        ledgerAPI.getStats(selectedYear),
+        ledgerAPI.getStats(selectedYear || undefined, selectedMonth || undefined),
         ledgerAPI.getCategories()
       ]);
       setMonthlyStats(statsData);
@@ -40,7 +42,7 @@ const Ledger: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [selectedYear]);
+  }, [selectedYear, selectedMonth]);
 
   useEffect(() => {
     fetchData();
@@ -91,20 +93,43 @@ const Ledger: React.FC = () => {
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('ko-KR').format(amount);
+    return `₩${new Intl.NumberFormat('ko-KR').format(amount)}`;
   };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('ko-KR');
   };
 
-  const getYearOptions = () => {
+  const getYearOptions = (): { value: number | null; label: string }[] => {
     const currentYear = new Date().getFullYear();
-    const years = [];
+    const years: { value: number | null; label: string }[] = [{ value: null, label: '전체' }];
     for (let i = currentYear; i >= currentYear - 5; i--) {
-      years.push(i);
+      years.push({ value: i, label: i.toString() });
     }
     return years;
+  };
+
+  const getMonthOptions = (): { value: number | null; label: string }[] => {
+    const months: { value: number | null; label: string }[] = [{ value: null, label: '전체' }];
+    for (let i = 1; i <= 12; i++) {
+      months.push({ value: i, label: `${i}월` });
+    }
+    return months;
+  };
+
+  const getSortedEntries = (entries: LedgerEntry[]) => {
+    switch (sortBy) {
+      case 'latest':
+        return [...entries].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      case 'category':
+        return [...entries].sort((a, b) => a.category.localeCompare(b.category));
+      case 'amount_desc':
+        return [...entries].sort((a, b) => b.amount - a.amount);
+      case 'amount_asc':
+        return [...entries].sort((a, b) => a.amount - b.amount);
+      default:
+        return entries;
+    }
   };
 
   const getActionIcon = (action: LedgerLogAction) => {
@@ -202,7 +227,7 @@ const Ledger: React.FC = () => {
                       )}
                     </td>
                     <td style={{ padding: '12px', fontWeight: 'bold' }}>
-                      ${formatCurrency(log.amount)}
+                      {formatCurrency(log.amount)}
                     </td>
                     <td style={{ padding: '12px' }}>
                       <span style={{
@@ -234,13 +259,43 @@ const Ledger: React.FC = () => {
   if (error) return <div style={{ color: 'red' }}>Error: {error}</div>;
 
   return (
-    <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
+    <div style={{ padding: window.innerWidth <= 768 ? '10px' : '20px', maxWidth: '1200px', margin: '0 auto' }}>
+      <style>{`
+        @media (max-width: 768px) {
+          .mobile-responsive {
+            flex-direction: column !important;
+          }
+          .filter-controls {
+            flex-direction: column !important;
+            gap: 10px !important;
+            align-items: stretch !important;
+          }
+          .filter-controls select {
+            width: 100% !important;
+          }
+          .category-grid {
+            flex-direction: column !important;
+          }
+          .category-card {
+            min-width: 100% !important;
+            margin-bottom: 10px !important;
+          }
+          .month-header {
+            flex-direction: column !important;
+            text-align: center !important;
+          }
+          .month-stats {
+            flex-direction: column !important;
+            gap: 5px !important;
+          }
+        }
+      `}</style>
+      <div className="mobile-responsive" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
         <h1>Household Ledger</h1>
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+        <div className="filter-controls" style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
           <select
-            value={selectedYear}
-            onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+            value={selectedYear || ''}
+            onChange={(e) => setSelectedYear(e.target.value ? parseInt(e.target.value) : null)}
             style={{
               padding: '8px 12px',
               border: '1px solid #ddd',
@@ -248,9 +303,38 @@ const Ledger: React.FC = () => {
               fontSize: '16px'
             }}
           >
-            {getYearOptions().map(year => (
-              <option key={year} value={year}>{year}</option>
+            {getYearOptions().map(option => (
+              <option key={option.value || 'all'} value={option.value || ''}>{option.label}</option>
             ))}
+          </select>
+          <select
+            value={selectedMonth || ''}
+            onChange={(e) => setSelectedMonth(e.target.value ? parseInt(e.target.value) : null)}
+            style={{
+              padding: '8px 12px',
+              border: '1px solid #ddd',
+              borderRadius: '4px',
+              fontSize: '16px'
+            }}
+          >
+            {getMonthOptions().map(option => (
+              <option key={option.value || 'all'} value={option.value || ''}>{option.label}</option>
+            ))}
+          </select>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+            style={{
+              padding: '8px 12px',
+              border: '1px solid #ddd',
+              borderRadius: '4px',
+              fontSize: '16px'
+            }}
+          >
+            <option value="latest">최신순</option>
+            <option value="category">카테고리별</option>
+            <option value="amount_desc">금액 높은순</option>
+            <option value="amount_asc">금액 낮은순</option>
           </select>
           {hasEditPermission && (
             <button
@@ -285,6 +369,7 @@ const Ledger: React.FC = () => {
               overflow: 'hidden'
             }}>
               <div
+                className="month-header"
                 style={{
                   backgroundColor: '#f8f9fa',
                   padding: '20px',
@@ -300,7 +385,7 @@ const Ledger: React.FC = () => {
                   <h3 style={{ margin: '0 0 8px 0', fontSize: '20px', color: '#212529' }}>
                     📅 {monthData.month.replace('-', '/')}
                   </h3>
-                  <div style={{ display: 'flex', gap: '15px', fontSize: '14px', color: '#6c757d' }}>
+                  <div className="month-stats" style={{ display: 'flex', gap: '15px', fontSize: '14px', color: '#6c757d' }}>
                     <span>📊 {Object.keys(monthData.categories).length} categories</span>
                     <span>📝 {Object.values(monthData.categories).reduce((sum, cat) => sum + cat.count, 0)} entries</span>
                     <span>💰 Avg {formatCurrency(Math.round(monthData.totalAmount / Object.values(monthData.categories).reduce((sum, cat) => sum + cat.count, 0)))}/entry</span>
@@ -308,7 +393,7 @@ const Ledger: React.FC = () => {
                 </div>
                 <div style={{ textAlign: 'right' }}>
                   <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#007bff', marginBottom: '5px' }}>
-                    ${formatCurrency(monthData.totalAmount)}
+                    {formatCurrency(monthData.totalAmount)}
                   </div>
                   <div style={{ fontSize: '14px', color: '#6c757d' }}>
                     {expandedMonths.has(monthData.month) ? 'Collapse ▲' : 'Expand ▼'}
@@ -329,7 +414,7 @@ const Ledger: React.FC = () => {
                     <h4 style={{ margin: '0 0 15px 0', color: '#495057' }}>
                       📊 {monthData.month.replace('-', '/')} Category Breakdown
                     </h4>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                    <div className="category-grid" style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
                       {Object.entries(monthData.categories)
                         .sort(([,a], [,b]) => b.total - a.total) // 금액 순으로 정렬
                         .map(([category, categoryData], index) => {
@@ -339,7 +424,7 @@ const Ledger: React.FC = () => {
                           const color = colors[index % colors.length];
                           
                           return (
-                            <div key={`summary-${category}`} style={{
+                            <div key={`summary-${category}`} className="category-card" style={{
                               backgroundColor: 'white',
                               padding: '12px',
                               borderRadius: '6px',
@@ -352,7 +437,7 @@ const Ledger: React.FC = () => {
                                 {category}
                               </div>
                               <div style={{ fontSize: '18px', fontWeight: 'bold', color: color }}>
-                                ${formatCurrency(categoryData.total)}
+                                {formatCurrency(categoryData.total)}
                               </div>
                               <div style={{ fontSize: '12px', color: '#6c757d' }}>
                                 {categoryData.count} entries · {percentage}%
@@ -393,11 +478,11 @@ const Ledger: React.FC = () => {
                       }}>
                         <span>{category}</span>
                         <span style={{ fontSize: '14px', color: '#666' }}>
-                          ${formatCurrency(categoryData.total)} ({categoryData.count} entries)
+                          {formatCurrency(categoryData.total)} ({categoryData.count} entries)
                         </span>
                       </h5>
                       <div style={{ paddingLeft: '15px' }}>
-                        {categoryData.entries.map((entry, index) => (
+                        {getSortedEntries(categoryData.entries).map((entry, index) => (
                           <div key={entry.id} style={{
                             display: 'flex',
                             justifyContent: 'space-between',
@@ -419,7 +504,7 @@ const Ledger: React.FC = () => {
                               </div>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                              <strong>${formatCurrency(entry.amount)}</strong>
+                              <strong>{formatCurrency(entry.amount)}</strong>
                               {hasEditPermission && (
                                 <div style={{ display: 'flex', gap: '5px' }}>
                                   <button

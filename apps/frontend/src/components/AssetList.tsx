@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Asset, assetAPI } from '../services/api';
 import AssetSummary from './AssetSummary';
 import AuditLogTable from './AuditLogTable';
@@ -21,6 +21,8 @@ const AssetList: React.FC = () => {
     amount: 0,
     note: '',
   });
+  
+  const assetTableRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchAssets();
@@ -100,6 +102,14 @@ const AssetList: React.FC = () => {
 
   const handleCategoryClick = (category: string) => {
     setSelectedCategory(category);
+    
+    // Scroll to asset table
+    if (assetTableRef.current) {
+      assetTableRef.current.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start' 
+      });
+    }
   };
 
   const clearCategoryFilter = () => {
@@ -487,7 +497,7 @@ const AssetList: React.FC = () => {
         </form>
       </Modal>
 
-      <div style={{ 
+      <div ref={assetTableRef} style={{ 
         backgroundColor: 'white', 
         borderRadius: '12px', 
         overflow: 'hidden',
