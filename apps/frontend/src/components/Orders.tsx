@@ -629,15 +629,20 @@ const Orders: React.FC = () => {
             maxHeight: '80vh',
             overflowY: 'auto'
           }}>
-            <h3>✅ Complete Order</h3>
+            <h3 style={{ textAlign: 'center' }}>✅ Complete Order</h3>
             <div style={{ 
               backgroundColor: '#f8f9fa', 
               padding: '15px', 
               borderRadius: '4px', 
-              marginBottom: '20px' 
+              marginBottom: '20px',
+              textAlign: 'center'
             }}>
-              <strong>Order:</strong> {completingOrder.foodType} - {formatDate(completingOrder.date)}<br />
-              <strong>Details:</strong> {completingOrder.details}
+              <div style={{ marginBottom: '8px' }}>
+                <strong>Order:</strong> {completingOrder.foodType} - {formatDate(completingOrder.date)}
+              </div>
+              <div>
+                <strong>Details:</strong> {completingOrder.details}
+              </div>
             </div>
             <form onSubmit={handleCompleteOrder} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
 

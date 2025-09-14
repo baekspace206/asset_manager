@@ -10,11 +10,12 @@ import { Order } from './entities/order.entity';
 import { FoodRank } from './entities/food-rank.entity';
 import { FoodItem } from './entities/food-item.entity';
 import { FoodRating } from './entities/food-rating.entity';
+import { User } from '../users/entities/user.entity';
 import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Order, FoodRank, FoodItem, FoodRating]),
+    TypeOrmModule.forFeature([Order, FoodRank, FoodItem, FoodRating, User]),
     UsersModule
   ],
   controllers: [OrdersController, FoodRankController, FoodItemController],

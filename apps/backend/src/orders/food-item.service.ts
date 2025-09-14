@@ -6,6 +6,7 @@ import { FoodRating } from './entities/food-rating.entity';
 import { CreateFoodItemDto } from './dto/create-food-item.dto';
 import { CreateFoodRatingDto } from './dto/create-food-rating.dto';
 import { UpdateFoodRatingDto } from './dto/update-food-rating.dto';
+import { User } from '../users/entities/user.entity';
 
 export interface FoodItemWithRatings extends FoodItem {
   baekRating?: FoodRating;
@@ -22,6 +23,8 @@ export class FoodItemService {
     private foodItemRepository: Repository<FoodItem>,
     @InjectRepository(FoodRating)
     private foodRatingRepository: Repository<FoodRating>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
   ) {}
 
   async create(createFoodItemDto: CreateFoodItemDto, userId: number): Promise<FoodItem> {
@@ -39,7 +42,7 @@ export class FoodItemService {
       order: { createdAt: 'DESC' },
     });
 
-    return foodItems.map(item => this.mapToFoodItemWithRatings(item));
+    return Promise.all(foodItems.map(item => this.mapToFoodItemWithRatings(item)));
   }
 
   async findOne(id: number): Promise<FoodItemWithRatings> {
@@ -52,7 +55,7 @@ export class FoodItemService {
       throw new NotFoundException('Food item not found');
     }
 
-    return this.mapToFoodItemWithRatings(foodItem);
+    return await this.mapToFoodItemWithRatings(foodItem);
   }
 
   async addRating(createRatingDto: CreateFoodRatingDto, userId: number): Promise<FoodRating> {
@@ -118,9 +121,17 @@ export class FoodItemService {
     return { success: true };
   }
 
-  private mapToFoodItemWithRatings(item: FoodItem): FoodItemWithRatings {
-    const baekRating = item.ratings?.find(r => r.userId === this.getBaekUserId());
-    const jeongRating = item.ratings?.find(r => r.userId === this.getJeongUserId());
+  private async mapToFoodItemWithRatings(item: FoodItem): Promise<FoodItemWithRatings> {
+    const baekUser = await this.userRepository.findOne({ where: { username: 'baek' } });
+    const jeongUser = await this.userRepository.findOne({ where: { username: 'jeong' } });
+    const jaeminUser = await this.userRepository.findOne({ where: { username: 'jaemin' } });
+    
+    // baek 또는 jaemin은 baekRating으로 처리
+    const baekUserId = baekUser?.id || jaeminUser?.id;
+    const jeongUserId = jeongUser?.id;
+    
+    const baekRating = baekUserId ? item.ratings?.find(r => r.userId === baekUserId) : undefined;
+    const jeongRating = jeongUserId ? item.ratings?.find(r => r.userId === jeongUserId) : undefined;
     
     const ratings = item.ratings?.filter(r => r.rating) || [];
     const averageRating = ratings.length > 0 
@@ -137,16 +148,6 @@ export class FoodItemService {
     };
   }
 
-  // 사용자 ID를 가져오는 헬퍼 메서드 (실제 구현에서는 사용자 서비스에서 가져와야 함)
-  private getBaekUserId(): number {
-    // TODO: 실제 baek 사용자 ID를 동적으로 가져오기
-    return 19; // 현재 baek의 ID
-  }
-
-  private getJeongUserId(): number {
-    // TODO: 실제 jeong 사용자 ID를 동적으로 가져오기
-    return 1; // jeong의 ID (가정)
-  }
 
   // 필터링 메서드들
   async getCompletedItems(): Promise<FoodItemWithRatings[]> {

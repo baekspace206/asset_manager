@@ -22,7 +22,7 @@ const FoodItemRanking: React.FC = () => {
   const [createForm, setCreateForm] = useState<CreateFoodItemDto>({
     foodType: '',
     restaurantName: '',
-    foodImage: '',
+    foodImage: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg==', // Default placeholder image
     date: new Date().toISOString().split('T')[0],
     description: ''
   });
@@ -122,7 +122,7 @@ const FoodItemRanking: React.FC = () => {
       setCreateForm({
         foodType: '',
         restaurantName: '',
-        foodImage: '',
+        foodImage: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg==',
         date: new Date().toISOString().split('T')[0],
         description: ''
       });
@@ -624,9 +624,11 @@ const FoodItemRanking: React.FC = () => {
                   type="file"
                   accept="image/*"
                   onChange={handleFileChange}
-                  required
                   style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
                 />
+                <small style={{ color: '#666', fontSize: '12px' }}>
+                  * 사진은 선택사항입니다
+                </small>
                 {previewImage && (
                   <img
                     src={previewImage}
