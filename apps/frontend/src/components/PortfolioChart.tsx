@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { PortfolioGrowthData, portfolioAPI } from '../services/api';
 
@@ -10,21 +10,7 @@ const PortfolioChart: React.FC = () => {
   const [endDate, setEndDate] = useState<string>('');
   const [dateRange, setDateRange] = useState<'7d' | '1m' | '3m' | '6m' | '1y' | 'all' | 'custom'>('1m');
 
-  useEffect(() => {
-    fetchGrowthData();
-  }, []);
-
-  useEffect(() => {
-    if (dateRange !== 'custom') {
-      applyDateRange();
-    }
-  }, [dateRange]);
-
-  useEffect(() => {
-    fetchGrowthData();
-  }, [startDate, endDate]);
-
-  const applyDateRange = () => {
+  const applyDateRange = useCallback(() => {
     const now = new Date();
     const today = now.toISOString().split('T')[0];
     
@@ -59,9 +45,9 @@ const PortfolioChart: React.FC = () => {
         setEndDate('');
         break;
     }
-  };
+  }, [dateRange]);
 
-  const fetchGrowthData = async () => {
+  const fetchGrowthData = useCallback(async () => {
     try {
       setError(null);
       const data = await portfolioAPI.getGrowthData(
@@ -75,7 +61,18 @@ const PortfolioChart: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [startDate, endDate]);
+
+  // Effects after function declarations
+  useEffect(() => {
+    fetchGrowthData();
+  }, [fetchGrowthData]);
+
+  useEffect(() => {
+    if (dateRange !== 'custom') {
+      applyDateRange();
+    }
+  }, [dateRange, applyDateRange]);
 
   const formatTooltipValue = (value: number) => {
     return [`₩${value.toLocaleString()}`, 'Portfolio Value'];
