@@ -7,7 +7,7 @@ const Orders: React.FC = () => {
   const [pendingOrders, setPendingOrders] = useState<Order[]>([]);
   const [completedOrders, setCompletedOrders] = useState<Order[]>([]);
   const [newOrder, setNewOrder] = useState<CreateOrderDto>({
-    date: '',
+    date: new Date().toISOString().split('T')[0], // Set default to today
     foodType: '',
     details: ''
   });
@@ -50,7 +50,7 @@ const Orders: React.FC = () => {
     try {
       setLoading(true);
       await orderAPI.create(newOrder);
-      setNewOrder({ date: '', foodType: '', details: '' });
+      setNewOrder({ date: new Date().toISOString().split('T')[0], foodType: '', details: '' });
       await fetchOrders();
       setError(null);
     } catch (err: any) {
@@ -128,7 +128,35 @@ const Orders: React.FC = () => {
   };
 
   return (
-    <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
+    <div style={{ padding: window.innerWidth <= 768 ? '10px' : '20px', maxWidth: '1200px', margin: '0 auto' }}>
+      <style>{`
+        @media (max-width: 768px) {
+          .order-card {
+            flex-direction: column !important;
+          }
+          .order-content {
+            margin-bottom: 15px !important;
+          }
+          .order-actions {
+            display: flex !important;
+            gap: 8px !important;
+            justify-content: center !important;
+            flex-wrap: wrap !important;
+          }
+          .order-actions button {
+            flex: 1 !important;
+            min-width: 60px !important;
+          }
+          .completed-order-actions {
+            flex-direction: row !important;
+            gap: 8px !important;
+            min-width: auto !important;
+          }
+          .form-grid {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
       <h2>🍽️ Food Management</h2>
 
       {error && (
@@ -193,7 +221,7 @@ const Orders: React.FC = () => {
           }}>
             <h3>📝 New Food Order</h3>
             <form onSubmit={handleCreateOrder} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+              <div className="form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
                 <div>
                   <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Date:</label>
                   <input
@@ -210,12 +238,12 @@ const Orders: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Food Type:</label>
+                  <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Food Name:</label>
                   <input
                     type="text"
                     value={newOrder.foodType}
                     onChange={(e) => setNewOrder({ ...newOrder, foodType: e.target.value })}
-                    placeholder="e.g., Korean, Chinese, Pizza"
+                    placeholder="e.g., Bulgogi, Jajangmyeon, Margherita Pizza"
                     required
                     style={{ 
                       width: '100%', 
@@ -315,17 +343,17 @@ const Orders: React.FC = () => {
                   padding: '20px',
                   backgroundColor: 'white'
                 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <div style={{ flex: 1 }}>
+                  <div className="order-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div className="order-content" style={{ flex: 1 }}>
                       <h4 style={{ margin: '0 0 10px 0', color: '#007bff' }}>
-                        📅 {formatDate(order.date)} - {order.foodType}
+                        {order.foodType}
                       </h4>
                       <p style={{ margin: '0 0 10px 0', color: '#666' }}>{order.details}</p>
                       <small style={{ color: '#888' }}>
                         Created: {formatDate(order.createdAt)}
                       </small>
                     </div>
-                    <div style={{ display: 'flex', gap: '8px', marginLeft: '15px' }}>
+                    <div className="order-actions" style={{ display: 'flex', gap: '8px', marginLeft: '15px' }}>
                       <button
                         onClick={() => handleEditOrder(order)}
                         style={{
@@ -393,10 +421,10 @@ const Orders: React.FC = () => {
                   padding: '20px',
                   backgroundColor: '#f8f9fa'
                 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <div style={{ flex: 1 }}>
+                  <div className="order-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div className="order-content" style={{ flex: 1 }}>
                       <h4 style={{ margin: '0 0 10px 0', color: '#28a745' }}>
-                        ✅ {formatDate(order.date)} - {order.foodType}
+                        {order.foodType}
                       </h4>
                       <p style={{ margin: '0 0 10px 0', color: '#666' }}>{order.details}</p>
                       {order.completedComment && (
@@ -429,7 +457,7 @@ const Orders: React.FC = () => {
                         {order.completedAt && <span>Completed: {formatDate(order.completedAt)}</span>}
                       </div>
                     </div>
-                    <div style={{ display: 'flex', gap: '10px', flexDirection: 'column', minWidth: '80px' }}>
+                    <div className="completed-order-actions" style={{ display: 'flex', gap: '10px', flexDirection: 'column', minWidth: '80px' }}>
                       <button
                         onClick={() => handleEditOrder(order)}
                         style={{
@@ -512,7 +540,7 @@ const Orders: React.FC = () => {
                 />
               </div>
               <div>
-                <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Food Type:</label>
+                <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Food Name:</label>
                 <input
                   type="text"
                   value={editingOrder.foodType}

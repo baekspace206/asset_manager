@@ -37,6 +37,34 @@ const FoodItemRanking: React.FC = () => {
   const [selectedImage, setSelectedImage] = useState<{ src: string; alt: string } | null>(null);
   const [previewImage, setPreviewImage] = useState<string>('');
 
+  // Image compression function
+  const compressImage = (file: File, maxWidth = 800, quality = 0.8): Promise<string> => {
+    return new Promise((resolve) => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+      
+      img.onload = () => {
+        // Calculate new dimensions
+        let { width, height } = img;
+        if (width > maxWidth) {
+          height = (height * maxWidth) / width;
+          width = maxWidth;
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        
+        // Draw and compress
+        ctx?.drawImage(img, 0, 0, width, height);
+        const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+        resolve(compressedDataUrl);
+      };
+      
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
   const fetchFoodItems = useCallback(async () => {
     try {
       setLoading(true);
@@ -57,11 +85,11 @@ const FoodItemRanking: React.FC = () => {
     fetchFoodItems();
   }, [fetchFoodItems]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        setError('File size must be less than 5MB');
+      if (file.size > 10 * 1024 * 1024) {
+        setError('File size must be less than 10MB');
         return;
       }
 
@@ -70,13 +98,18 @@ const FoodItemRanking: React.FC = () => {
         return;
       }
 
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const result = e.target?.result as string;
-        setCreateForm({ ...createForm, foodImage: result });
-        setPreviewImage(result);
-      };
-      reader.readAsDataURL(file);
+      try {
+        setLoading(true);
+        // Compress the image
+        const compressedImage = await compressImage(file, 800, 0.8);
+        setCreateForm({ ...createForm, foodImage: compressedImage });
+        setPreviewImage(compressedImage);
+        setError(null);
+      } catch (err) {
+        setError('Failed to process image');
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -184,10 +217,25 @@ const FoodItemRanking: React.FC = () => {
   };
 
   const getRatingStatus = (item: FoodItemWithRatings) => {
-    if (item.isCompleted) return '✅ 평가 완료';
-    if (item.baekRating && !item.jeongRating) return '⏳ Jeong 평가 대기';
-    if (!item.baekRating && item.jeongRating) return '⏳ Baek 평가 대기';
-    return '⏳ 평가 대기';
+    if (!user) return '⏳ 평가 대기';
+    
+    const currentUserRating = getCurrentUserRating(item);
+    const otherUserRating = user.username === 'baek' ? item.jeongRating : item.baekRating;
+    
+    if (currentUserRating && otherUserRating) {
+      return '✅ 모든 평가 완료';
+    }
+    
+    if (currentUserRating && !otherUserRating) {
+      const otherUser = user.username === 'baek' ? 'Jeong' : 'Baek';
+      return `⏳ ${otherUser} 평가 대기 (내 평가: ${currentUserRating.rating}⭐)`;
+    }
+    
+    if (!currentUserRating && otherUserRating) {
+      return `⏳ 내 평가 대기 (상대방 평가: ${otherUserRating.rating}⭐)`;
+    }
+    
+    return '⏳ 평가 대기 (미평가)';
   };
 
 
@@ -319,15 +367,15 @@ const FoodItemRanking: React.FC = () => {
               backgroundColor: item.isCompleted ? '#f8f9fa' : 'white'
             }}
           >
-            <div style={{ display: 'flex', gap: '20px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
               {/* Image */}
-              <div style={{ flexShrink: 0 }}>
+              <div style={{ display: 'flex', justifyContent: 'center' }}>
                 <img
                   src={item.foodImage}
                   alt={`${item.restaurantName} - ${item.foodType}`}
                   style={{
-                    width: '120px',
-                    height: '120px',
+                    width: '200px',
+                    height: '200px',
                     objectFit: 'cover',
                     borderRadius: '8px',
                     cursor: 'pointer'
@@ -345,19 +393,19 @@ const FoodItemRanking: React.FC = () => {
               {/* Content */}
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <div>
-                    <h3 style={{ margin: '0 0 10px 0', color: '#333' }}>
+                  <div style={{ flex: 1 }}>
+                    <h3 style={{ margin: '0 0 10px 0', color: '#333', textAlign: 'center' }}>
                       🏪 {item.restaurantName} - {item.foodType}
                     </h3>
-                    <p style={{ margin: '0 0 10px 0', color: '#666', fontSize: '14px' }}>
+                    <p style={{ margin: '0 0 10px 0', color: '#666', fontSize: '14px', textAlign: 'center' }}>
                       📅 {formatDate(item.date)}
                     </p>
                     {item.description && (
-                      <p style={{ margin: '0 0 15px 0', color: '#666', fontSize: '14px' }}>
+                      <p style={{ margin: '0 0 15px 0', color: '#666', fontSize: '14px', textAlign: 'center' }}>
                         {item.description}
                       </p>
                     )}
-                    <div style={{ fontSize: '12px', color: '#888' }}>
+                    <div style={{ fontSize: '12px', color: '#888', textAlign: 'center' }}>
                       {getRatingStatus(item)}
                     </div>
                   </div>
@@ -516,19 +564,6 @@ const FoodItemRanking: React.FC = () => {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
                 <div>
                   <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-                    🍕 Food Type:
-                  </label>
-                  <input
-                    type="text"
-                    value={createForm.foodType}
-                    onChange={(e) => setCreateForm({ ...createForm, foodType: e.target.value })}
-                    placeholder="e.g., Pizza, Burger, Pasta"
-                    required
-                    style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
-                  />
-                </div>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
                     🏪 Restaurant Name:
                   </label>
                   <input
@@ -536,6 +571,19 @@ const FoodItemRanking: React.FC = () => {
                     value={createForm.restaurantName}
                     onChange={(e) => setCreateForm({ ...createForm, restaurantName: e.target.value })}
                     placeholder="Restaurant name"
+                    required
+                    style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+                    🍕 Food Name:
+                  </label>
+                  <input
+                    type="text"
+                    value={createForm.foodType}
+                    onChange={(e) => setCreateForm({ ...createForm, foodType: e.target.value })}
+                    placeholder="e.g., Margherita Pizza, Bulgogi Burger"
                     required
                     style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
                   />
