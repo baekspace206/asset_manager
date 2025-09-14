@@ -345,11 +345,11 @@ const Orders: React.FC = () => {
                 }}>
                   <div className="order-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <div className="order-content" style={{ flex: 1 }}>
-                      <h4 style={{ margin: '0 0 10px 0', color: '#007bff' }}>
+                      <h4 style={{ margin: '0 0 10px 0', color: '#007bff', textAlign: 'center' }}>
                         {order.foodType}
                       </h4>
-                      <p style={{ margin: '0 0 10px 0', color: '#666' }}>{order.details}</p>
-                      <small style={{ color: '#888' }}>
+                      <p style={{ margin: '0 0 10px 0', color: '#666', textAlign: 'center' }}>{order.details}</p>
+                      <small style={{ color: '#888', display: 'block', textAlign: 'center' }}>
                         Created: {formatDate(order.createdAt)}
                       </small>
                     </div>
