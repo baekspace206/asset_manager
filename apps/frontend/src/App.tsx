@@ -137,6 +137,15 @@ function AppContent() {
 
   return (
     <div className="App">
+      <style>{`
+        .mobile-nav-container::-webkit-scrollbar {
+          display: none;
+        }
+        .mobile-nav-container {
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+      `}</style>
       <Header 
         onShowAdminDashboard={() => setCurrentView('admin')}
         onShowAssets={() => setCurrentView('assets')}
@@ -149,104 +158,123 @@ function AppContent() {
       <div style={{ 
         backgroundColor: 'white', 
         borderBottom: '1px solid #e5e7eb',
-        padding: '15px 20px',
-        display: 'flex',
-        gap: '10px',
-        justifyContent: 'center',
-        flexWrap: 'wrap'
+        padding: window.innerWidth <= 768 ? '10px 0' : '15px 20px'
       }}>
+        <div 
+          className={window.innerWidth <= 768 ? 'mobile-nav-container' : ''}
+          style={{
+            display: 'flex',
+            gap: '10px',
+            justifyContent: window.innerWidth <= 768 ? 'flex-start' : 'center',
+            flexWrap: window.innerWidth <= 768 ? 'nowrap' : 'wrap',
+            overflowX: window.innerWidth <= 768 ? 'auto' : 'visible',
+            paddingLeft: window.innerWidth <= 768 ? '15px' : '0',
+            paddingRight: window.innerWidth <= 768 ? '15px' : '0',
+            WebkitOverflowScrolling: 'touch'
+          }}>
         <button
           onClick={() => setCurrentView('assets')}
           style={{
-            padding: '8px 16px',
+            padding: window.innerWidth <= 768 ? '6px 12px' : '8px 16px',
             backgroundColor: currentView === 'assets' ? '#007bff' : '#f8f9fa',
             color: currentView === 'assets' ? 'white' : '#495057',
             border: '1px solid #dee2e6',
             borderRadius: '6px',
             cursor: 'pointer',
-            fontSize: '14px',
+            fontSize: window.innerWidth <= 768 ? '12px' : '14px',
             fontWeight: '500',
             display: 'flex',
             alignItems: 'center',
-            gap: '6px'
+            gap: '6px',
+            whiteSpace: 'nowrap',
+            minWidth: window.innerWidth <= 768 ? 'auto' : 'unset'
           }}
         >
-          💼 Asset Management
+          💼 {window.innerWidth <= 768 ? 'Assets' : 'Asset Management'}
         </button>
         <button
           onClick={() => setCurrentView('ledger')}
           style={{
-            padding: '8px 16px',
+            padding: window.innerWidth <= 768 ? '6px 12px' : '8px 16px',
             backgroundColor: currentView === 'ledger' ? '#28a745' : '#f8f9fa',
             color: currentView === 'ledger' ? 'white' : '#495057',
             border: '1px solid #dee2e6',
             borderRadius: '6px',
             cursor: 'pointer',
-            fontSize: '14px',
+            fontSize: window.innerWidth <= 768 ? '12px' : '14px',
             fontWeight: '500',
             display: 'flex',
             alignItems: 'center',
-            gap: '6px'
+            gap: '6px',
+            whiteSpace: 'nowrap',
+            minWidth: window.innerWidth <= 768 ? 'auto' : 'unset'
           }}
         >
-          📊 Financial Ledger
+          📊 {window.innerWidth <= 768 ? 'Ledger' : 'Financial Ledger'}
         </button>
         <button
           onClick={() => setCurrentView('orders')}
           style={{
-            padding: '8px 16px',
+            padding: window.innerWidth <= 768 ? '6px 12px' : '8px 16px',
             backgroundColor: currentView === 'orders' ? '#fd7e14' : '#f8f9fa',
             color: currentView === 'orders' ? 'white' : '#495057',
             border: '1px solid #dee2e6',
             borderRadius: '6px',
             cursor: 'pointer',
-            fontSize: '14px',
+            fontSize: window.innerWidth <= 768 ? '12px' : '14px',
             fontWeight: '500',
             display: 'flex',
             alignItems: 'center',
-            gap: '6px'
+            gap: '6px',
+            whiteSpace: 'nowrap',
+            minWidth: window.innerWidth <= 768 ? 'auto' : 'unset'
           }}
         >
-          🍽️ Food Orders
+          🍽️ {window.innerWidth <= 768 ? 'Food' : 'Food Orders'}
         </button>
         <button
           onClick={() => setCurrentView('diary')}
           style={{
-            padding: '8px 16px',
+            padding: window.innerWidth <= 768 ? '6px 12px' : '8px 16px',
             backgroundColor: currentView === 'diary' ? '#e83e8c' : '#f8f9fa',
             color: currentView === 'diary' ? 'white' : '#495057',
             border: '1px solid #dee2e6',
             borderRadius: '6px',
             cursor: 'pointer',
-            fontSize: '14px',
+            fontSize: window.innerWidth <= 768 ? '12px' : '14px',
             fontWeight: '500',
             display: 'flex',
             alignItems: 'center',
-            gap: '6px'
+            gap: '6px',
+            whiteSpace: 'nowrap',
+            minWidth: window.innerWidth <= 768 ? 'auto' : 'unset'
           }}
         >
-          📔 My Diary
+          📔 {window.innerWidth <= 768 ? 'Diary' : 'My Diary'}
         </button>
         {isAdmin && (
           <button
             onClick={() => setCurrentView('admin')}
             style={{
-              padding: '8px 16px',
+              padding: window.innerWidth <= 768 ? '6px 12px' : '8px 16px',
               backgroundColor: currentView === 'admin' ? '#6f42c1' : '#f8f9fa',
               color: currentView === 'admin' ? 'white' : '#495057',
               border: '1px solid #dee2e6',
               borderRadius: '6px',
               cursor: 'pointer',
-              fontSize: '14px',
+              fontSize: window.innerWidth <= 768 ? '12px' : '14px',
               fontWeight: '500',
               display: 'flex',
               alignItems: 'center',
-              gap: '6px'
+              gap: '6px',
+              whiteSpace: 'nowrap',
+              minWidth: window.innerWidth <= 768 ? 'auto' : 'unset'
             }}
           >
-            👑 Admin Dashboard
+            👑 {window.innerWidth <= 768 ? 'Admin' : 'Admin Dashboard'}
           </button>
         )}
+        </div>
       </div>
       
       <div style={{ backgroundColor: '#f8fafc', minHeight: 'calc(100vh - 120px)' }}>
