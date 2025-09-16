@@ -382,7 +382,9 @@ const Orders: React.FC = () => {
                       gap: '8px', 
                       marginLeft: window.innerWidth <= 768 ? '0' : '15px',
                       marginTop: window.innerWidth <= 768 ? '15px' : '0',
-                      justifyContent: 'center'
+                      justifyContent: 'center',
+                      alignSelf: 'center',
+                      width: window.innerWidth <= 768 ? '100%' : 'auto'
                     }}>
                       <button
                         onClick={() => handleEditOrder(order)}

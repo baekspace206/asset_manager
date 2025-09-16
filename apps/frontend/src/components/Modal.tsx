@@ -53,7 +53,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
         alignItems: 'center',
         justifyContent: 'center',
         zIndex: 9999,
-        padding: '20px',
+        padding: '10px',
         backdropFilter: 'blur(2px)',
         WebkitBackdropFilter: 'blur(2px)'
       }}

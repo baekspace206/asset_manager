@@ -439,7 +439,12 @@ const AssetList: React.FC = () => {
               </label>
             </div>
           </div>
-          <div className="action-buttons" style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+          <div className="action-buttons" style={{ 
+            display: 'flex', 
+            gap: '12px', 
+            justifyContent: 'center',
+            flexDirection: window.innerWidth <= 768 ? 'row' : 'row'
+          }}>
             <button
               type="button"
               onClick={resetForm}

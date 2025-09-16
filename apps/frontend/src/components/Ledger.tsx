@@ -13,7 +13,7 @@ const Ledger: React.FC = () => {
   const [editingEntry, setEditingEntry] = useState<LedgerEntry | null>(null);
   const [selectedYear, setSelectedYear] = useState<number | null>(new Date().getFullYear());
   const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
-  const [sortBy, setSortBy] = useState<'latest' | 'category' | 'amount_desc' | 'amount_asc'>('latest');
+  const [sortBy, setSortBy] = useState<'latest' | 'category' | 'amount_desc' | 'amount_asc'>('category');
   const [expandedMonths, setExpandedMonths] = useState<Set<string>>(new Set());
   const [showLogs, setShowLogs] = useState(false);
 
@@ -403,13 +403,17 @@ const Ledger: React.FC = () => {
         @media (max-width: 768px) {
           .mobile-responsive {
             flex-direction: column !important;
-          }
-          .filter-controls {
-            flex-direction: column !important;
-            gap: 10px !important;
             align-items: stretch !important;
           }
-          .filter-controls select {
+          .filter-controls {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr !important;
+            gap: 10px !important;
+            margin-top: 15px !important;
+            align-items: stretch !important;
+          }
+          .filter-controls select,
+          .filter-controls button {
             width: 100% !important;
           }
           .category-grid {
