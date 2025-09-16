@@ -18,6 +18,8 @@ export interface FoodItemWithRatings extends FoodItem {
 
 @Injectable()
 export class FoodItemService {
+  private userCache: { baek?: User; jeong?: User; jaemin?: User } = {};
+
   constructor(
     @InjectRepository(FoodItem)
     private foodItemRepository: Repository<FoodItem>,
@@ -26,6 +28,30 @@ export class FoodItemService {
     @InjectRepository(User)
     private userRepository: Repository<User>,
   ) {}
+
+  private async getUserIds(): Promise<{ baekUserId?: number; jeongUserId?: number }> {
+    // 캐시된 사용자 정보가 없으면 한 번에 조회
+    if (!this.userCache.baek && !this.userCache.jeong && !this.userCache.jaemin) {
+      const users = await this.userRepository.find({
+        where: [
+          { username: 'baek' },
+          { username: 'jeong' },
+          { username: 'jaemin' }
+        ]
+      });
+
+      users.forEach(user => {
+        if (user.username === 'baek') this.userCache.baek = user;
+        else if (user.username === 'jeong') this.userCache.jeong = user;
+        else if (user.username === 'jaemin') this.userCache.jaemin = user;
+      });
+    }
+
+    const baekUserId = this.userCache.baek?.id || this.userCache.jaemin?.id;
+    const jeongUserId = this.userCache.jeong?.id;
+
+    return { baekUserId, jeongUserId };
+  }
 
   async create(createFoodItemDto: CreateFoodItemDto, userId: number): Promise<FoodItem> {
     const foodItem = this.foodItemRepository.create({
@@ -122,13 +148,7 @@ export class FoodItemService {
   }
 
   private async mapToFoodItemWithRatings(item: FoodItem): Promise<FoodItemWithRatings> {
-    const baekUser = await this.userRepository.findOne({ where: { username: 'baek' } });
-    const jeongUser = await this.userRepository.findOne({ where: { username: 'jeong' } });
-    const jaeminUser = await this.userRepository.findOne({ where: { username: 'jaemin' } });
-    
-    // baek 또는 jaemin은 baekRating으로 처리
-    const baekUserId = baekUser?.id || jaeminUser?.id;
-    const jeongUserId = jeongUser?.id;
+    const { baekUserId, jeongUserId } = await this.getUserIds();
     
     const baekRating = baekUserId ? item.ratings?.find(r => r.userId === baekUserId) : undefined;
     const jeongRating = jeongUserId ? item.ratings?.find(r => r.userId === jeongUserId) : undefined;

@@ -788,24 +788,64 @@ const FoodItemRanking: React.FC = () => {
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            zIndex: 1000
+            zIndex: 1000,
+            padding: '20px',
+            boxSizing: 'border-box'
           }}
           onClick={() => {
             setShowImageModal(false);
             setSelectedImage(null);
           }}
         >
-          <div style={{ maxWidth: '90%', maxHeight: '90%' }}>
+          <div 
+            style={{ 
+              position: 'relative',
+              maxWidth: '90vw',
+              maxHeight: '90vh',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
             <img
               src={selectedImage.src}
               alt={selectedImage.alt}
               style={{
                 maxWidth: '100%',
                 maxHeight: '100%',
+                width: 'auto',
+                height: 'auto',
                 objectFit: 'contain',
-                borderRadius: '8px'
+                borderRadius: '8px',
+                boxShadow: '0 4px 20px rgba(0,0,0,0.5)'
               }}
             />
+            <button
+              onClick={() => {
+                setShowImageModal(false);
+                setSelectedImage(null);
+              }}
+              style={{
+                position: 'absolute',
+                top: '-10px',
+                right: '-10px',
+                width: '30px',
+                height: '30px',
+                borderRadius: '50%',
+                backgroundColor: 'rgba(255,255,255,0.9)',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+              }}
+            >
+              ×
+            </button>
           </div>
         </div>
       )}

@@ -343,17 +343,47 @@ const Orders: React.FC = () => {
                   padding: '20px',
                   backgroundColor: 'white'
                 }}>
-                  <div className="order-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <div className="order-content" style={{ flex: 1 }}>
-                      <h4 style={{ margin: '0 0 10px 0', color: '#007bff', textAlign: 'center' }}>
+                  <div className="order-card" style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'flex-start',
+                    flexDirection: window.innerWidth <= 768 ? 'column' : 'row'
+                  }}>
+                    <div className="order-content" style={{ 
+                      flex: 1,
+                      textAlign: 'center',
+                      width: '100%'
+                    }}>
+                      <h4 style={{ 
+                        margin: '0 0 10px 0', 
+                        color: '#007bff', 
+                        textAlign: 'center',
+                        width: '100%'
+                      }}>
                         {order.foodType}
                       </h4>
-                      <p style={{ margin: '0 0 10px 0', color: '#666', textAlign: 'center' }}>{order.details}</p>
-                      <small style={{ color: '#888', display: 'block', textAlign: 'center' }}>
+                      <p style={{ 
+                        margin: '0 0 10px 0', 
+                        color: '#666', 
+                        textAlign: 'center',
+                        width: '100%'
+                      }}>{order.details}</p>
+                      <small style={{ 
+                        color: '#888', 
+                        display: 'block', 
+                        textAlign: 'center',
+                        width: '100%'
+                      }}>
                         Created: {formatDate(order.createdAt)}
                       </small>
                     </div>
-                    <div className="order-actions" style={{ display: 'flex', gap: '8px', marginLeft: '15px' }}>
+                    <div className="order-actions" style={{ 
+                      display: 'flex', 
+                      gap: '8px', 
+                      marginLeft: window.innerWidth <= 768 ? '0' : '15px',
+                      marginTop: window.innerWidth <= 768 ? '15px' : '0',
+                      justifyContent: 'center'
+                    }}>
                       <button
                         onClick={() => handleEditOrder(order)}
                         style={{
