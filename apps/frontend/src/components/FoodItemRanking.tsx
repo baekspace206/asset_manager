@@ -800,8 +800,8 @@ const FoodItemRanking: React.FC = () => {
           <div 
             style={{ 
               position: 'relative',
-              maxWidth: '90vw',
-              maxHeight: '90vh',
+              maxWidth: '70vw',
+              maxHeight: '70vh',
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'center'

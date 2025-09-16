@@ -451,12 +451,31 @@ const Orders: React.FC = () => {
                   padding: '20px',
                   backgroundColor: '#f8f9fa'
                 }}>
-                  <div className="order-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <div className="order-content" style={{ flex: 1 }}>
-                      <h4 style={{ margin: '0 0 10px 0', color: '#28a745' }}>
+                  <div className="order-card" style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'flex-start',
+                    flexDirection: window.innerWidth <= 768 ? 'column' : 'row'
+                  }}>
+                    <div className="order-content" style={{ 
+                      flex: 1,
+                      textAlign: 'center',
+                      width: '100%'
+                    }}>
+                      <h4 style={{ 
+                        margin: '0 0 10px 0', 
+                        color: '#28a745',
+                        textAlign: 'center',
+                        width: '100%'
+                      }}>
                         {order.foodType}
                       </h4>
-                      <p style={{ margin: '0 0 10px 0', color: '#666' }}>{order.details}</p>
+                      <p style={{ 
+                        margin: '0 0 10px 0', 
+                        color: '#666',
+                        textAlign: 'center',
+                        width: '100%'
+                      }}>{order.details}</p>
                       {order.completedComment && (
                         <div style={{ 
                           backgroundColor: '#e9ecef', 
@@ -487,7 +506,15 @@ const Orders: React.FC = () => {
                         {order.completedAt && <span>Completed: {formatDate(order.completedAt)}</span>}
                       </div>
                     </div>
-                    <div className="completed-order-actions" style={{ display: 'flex', gap: '10px', flexDirection: 'column', minWidth: '80px' }}>
+                    <div className="completed-order-actions" style={{ 
+                      display: 'flex', 
+                      gap: '10px', 
+                      flexDirection: 'column', 
+                      minWidth: '80px',
+                      marginLeft: window.innerWidth <= 768 ? '0' : '15px',
+                      marginTop: window.innerWidth <= 768 ? '15px' : '0',
+                      alignSelf: window.innerWidth <= 768 ? 'center' : 'flex-start'
+                    }}>
                       <button
                         onClick={() => handleEditOrder(order)}
                         style={{
