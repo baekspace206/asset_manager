@@ -282,75 +282,112 @@ const FoodItemRanking: React.FC = () => {
 
       {/* Filters and Sort */}
       <div style={{ 
-        display: 'flex', 
-        gap: '20px', 
+        display: window.innerWidth <= 768 ? 'grid' : 'flex',
+        gridTemplateColumns: window.innerWidth <= 768 ? '1fr 1fr 1fr' : 'none',
+        gap: window.innerWidth <= 768 ? '10px' : '20px',
         marginBottom: '20px', 
         flexWrap: 'wrap',
         alignItems: 'center'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <label style={{ fontSize: '14px', fontWeight: '500', color: '#495057' }}>
-            평가 상태:
+        <div style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: window.innerWidth <= 768 ? '5px' : '10px',
+          flexDirection: window.innerWidth <= 768 ? 'column' : 'row'
+        }}>
+          <label style={{ 
+            fontSize: window.innerWidth <= 768 ? '12px' : '14px', 
+            fontWeight: '500', 
+            color: '#495057',
+            textAlign: 'center',
+            whiteSpace: 'nowrap'
+          }}>
+            {window.innerWidth <= 768 ? '평가' : '평가 상태'}:
           </label>
           <select
             value={filter === 'baek-rated' || filter === 'jeong-rated' ? 'all' : filter}
             onChange={(e) => setFilter(e.target.value as FilterType)}
             style={{
-              padding: '8px 12px',
+              padding: window.innerWidth <= 768 ? '6px 8px' : '8px 12px',
               border: '1px solid #dee2e6',
               borderRadius: '4px',
               backgroundColor: 'white',
-              fontSize: '14px',
-              cursor: 'pointer'
+              fontSize: window.innerWidth <= 768 ? '12px' : '14px',
+              cursor: 'pointer',
+              width: window.innerWidth <= 768 ? '100%' : 'auto'
             }}
           >
             <option value="all">전체</option>
-            <option value="completed">평가 완료</option>
-            <option value="incomplete">평가 대기</option>
+            <option value="completed">{window.innerWidth <= 768 ? '완료' : '평가 완료'}</option>
+            <option value="incomplete">{window.innerWidth <= 768 ? '대기' : '평가 대기'}</option>
           </select>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <label style={{ fontSize: '14px', fontWeight: '500', color: '#495057' }}>
-            사용자 필터:
+        <div style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: window.innerWidth <= 768 ? '5px' : '10px',
+          flexDirection: window.innerWidth <= 768 ? 'column' : 'row'
+        }}>
+          <label style={{ 
+            fontSize: window.innerWidth <= 768 ? '12px' : '14px', 
+            fontWeight: '500', 
+            color: '#495057',
+            textAlign: 'center',
+            whiteSpace: 'nowrap'
+          }}>
+            {window.innerWidth <= 768 ? '사용자' : '사용자 필터'}:
           </label>
           <select
             value={filter === 'baek-rated' ? 'baek-rated' : filter === 'jeong-rated' ? 'jeong-rated' : 'all'}
             onChange={(e) => setFilter(e.target.value as FilterType)}
             style={{
-              padding: '8px 12px',
+              padding: window.innerWidth <= 768 ? '6px 8px' : '8px 12px',
               border: '1px solid #dee2e6',
               borderRadius: '4px',
               backgroundColor: 'white',
-              fontSize: '14px',
-              cursor: 'pointer'
+              fontSize: window.innerWidth <= 768 ? '12px' : '14px',
+              cursor: 'pointer',
+              width: window.innerWidth <= 768 ? '100%' : 'auto'
             }}
           >
             <option value="all">전체</option>
-            <option value="baek-rated">Baek 평가</option>
-            <option value="jeong-rated">Jeong 평가</option>
+            <option value="baek-rated">{window.innerWidth <= 768 ? 'Baek' : 'Baek 평가'}</option>
+            <option value="jeong-rated">{window.innerWidth <= 768 ? 'Jeong' : 'Jeong 평가'}</option>
           </select>
         </div>
         
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <label style={{ fontSize: '14px', fontWeight: '500', color: '#495057' }}>
+        <div style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: window.innerWidth <= 768 ? '5px' : '10px',
+          flexDirection: window.innerWidth <= 768 ? 'column' : 'row'
+        }}>
+          <label style={{ 
+            fontSize: window.innerWidth <= 768 ? '12px' : '14px', 
+            fontWeight: '500', 
+            color: '#495057',
+            textAlign: 'center',
+            whiteSpace: 'nowrap'
+          }}>
             정렬:
           </label>
           <select
             value={sort}
             onChange={(e) => setSort(e.target.value as SortType)}
             style={{
-              padding: '8px 12px',
+              padding: window.innerWidth <= 768 ? '6px 8px' : '8px 12px',
               border: '1px solid #dee2e6',
               borderRadius: '4px',
               backgroundColor: 'white',
-              fontSize: '14px',
-              cursor: 'pointer'
+              fontSize: window.innerWidth <= 768 ? '12px' : '14px',
+              cursor: 'pointer',
+              width: window.innerWidth <= 768 ? '100%' : 'auto'
             }}
           >
             <option value="date">최신순</option>
-            <option value="rating-desc">평점 높은순</option>
-            <option value="rating-asc">평점 낮은순</option>
+            <option value="rating-desc">{window.innerWidth <= 768 ? '평점↓' : '평점 높은순'}</option>
+            <option value="rating-asc">{window.innerWidth <= 768 ? '평점↑' : '평점 낮은순'}</option>
           </select>
         </div>
       </div>
